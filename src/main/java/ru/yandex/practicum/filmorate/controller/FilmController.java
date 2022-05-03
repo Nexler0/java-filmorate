@@ -47,7 +47,8 @@ public class FilmController {
         if (!film.getName().isEmpty() &&
                 film.getDescription().length() > 0 &&
                 film.getDescription().length() <= 200 &&
-                film.getReleaseDate().isAfter(LocalDate.of(1895, 10, 28)) &&
+                LocalDate.parse(film.getReleaseDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        .isAfter(LocalDate.of(1895, 10, 28)) &&
                 !film.getDuration().isNegative()){
             return true;
         } else {

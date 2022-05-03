@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,7 +53,8 @@ public class UserController {
         }
         if (user.getEmail().contains("@") && !user.getEmail().isEmpty() &&
                 !user.getLogin().isEmpty() && !user.getLogin().isBlank() &&
-                user.getBirthday().isBefore(LocalDate.now())) {
+                LocalDate.parse(user.getBirthday(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        .isBefore(LocalDate.now())) {
             return true;
         } else {
             throw new ValidationException("User validation error");
