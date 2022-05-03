@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public String createUser(@RequestBody User user) {
+    public String createUser(@Valid @RequestBody User user) {
         if (approveUser(user)) {
             users.put(user.getLogin(), user);
             log.info("User created {}", gson.toJson(user));
@@ -35,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public void updateFilm(@RequestBody User user) {
+    public void updateFilm(@Valid @RequestBody User user) {
         if (approveUser(user)) {
             if (users.containsKey(user.getLogin())) {
                 users.replace(user.getLogin(), user);
