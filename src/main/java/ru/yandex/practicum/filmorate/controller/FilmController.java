@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -15,7 +14,7 @@ import java.util.Map;
 @RestController
 @Slf4j
 public class FilmController {
-
+    private static final LocalDate REFERENCE_DATE = LocalDate.of(1895, 10, 28);
     private Map<String, Film> films = new HashMap<>();
 
     @GetMapping("/films")
@@ -49,8 +48,8 @@ public class FilmController {
                 film.getDescription().length() > 0 &&
                 film.getDescription().length() <= 200 &&
                 LocalDate.parse(film.getReleaseDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                        .isAfter(LocalDate.of(1895, 10, 28)) &&
-                !film.getDuration().isNegative()){
+                        .isAfter(REFERENCE_DATE) &&
+                !film.getDuration().isNegative()) {
             return true;
         } else {
             throw new ValidationException("Film validation error");

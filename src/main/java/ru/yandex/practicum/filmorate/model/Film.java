@@ -6,7 +6,6 @@ import java.time.Duration;
 
 @Data
 public class Film {
-
     private int id;
     private final String name;
     private final String description;

@@ -15,7 +15,6 @@ import java.util.Map;
 @RestController
 @Slf4j
 public class UserController {
-
     private final Gson gson = new Gson();
     private Map<String, User> users = new HashMap<>();
 
