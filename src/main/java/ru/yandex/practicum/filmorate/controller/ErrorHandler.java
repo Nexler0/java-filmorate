@@ -3,7 +3,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exceptions.EmptyUsersFriendList;
+import ru.yandex.practicum.filmorate.exceptions.EmptyFilmsListException;
+import ru.yandex.practicum.filmorate.exceptions.EmptyUsersFriendListException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
@@ -22,16 +23,16 @@ public class ErrorHandler {
         return new ErrorResponse("Error", String.format("Ошибка “%s”", e.getMessage()));
     }
 
-    @ExceptionHandler(EmptyUsersFriendList.class)
+    @ExceptionHandler({EmptyUsersFriendListException.class, EmptyFilmsListException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse incorrectParameter(final EmptyUsersFriendList e){
+    public ErrorResponse incorrectParameter(final RuntimeException e){
         return new ErrorResponse("Error", String.format("Ошибка “%s”", e.getMessage()));
     }
 }
 
 class ErrorResponse {
-    String error;
-    String description;
+    private final String error;
+    private final String description;
 
     public ErrorResponse(String error, String description) {
         this.error = error;

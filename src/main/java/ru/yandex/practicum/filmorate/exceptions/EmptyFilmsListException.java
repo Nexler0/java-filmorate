@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
-public class EmptyUsersFriendList extends RuntimeException {
+public class EmptyFilmsListException extends RuntimeException {
     private final String message;
 
-    public EmptyUsersFriendList(String message) {
+    public EmptyFilmsListException(String message) {
         this.message = message;
     }
 
