@@ -1,63 +1,66 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @Slf4j
+@RequestMapping("/users")
 public class UserController {
-    private final Gson gson = new Gson();
-    private Map<String, User> users = new HashMap<>();
+    private final UserService userService;
 
-    @GetMapping("/users")
-    public Map<String, User> findAllUsers() {
-        return users;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @PostMapping("/users")
+    @GetMapping()
+    public List<User> findAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getAllUserFriendsById(@PathVariable Integer id) {
+        return userService.getAllUserFriends(id);
+    }
+
+    @PostMapping()
     public String createUser(@Valid @RequestBody User user) {
-        if (approveUser(user)) {
-            users.put(user.getLogin(), user);
-            log.info("User created {}", gson.toJson(user));
-            return gson.toJson(user);
-        } else {
-            return null;
-        }
+        return userService.createUser(user);
     }
 
-    @PutMapping("/users")
-    public void updateFilm(@Valid @RequestBody User user) {
-        if (approveUser(user)) {
-            if (users.containsKey(user.getLogin())) {
-                users.replace(user.getLogin(), user);
-                log.info("User updated");
-            } else {
-                users.put(user.getLogin(), user);
-                log.info("User created");
-            }
-        }
+    @PutMapping()
+    public User updateUser(@Valid @RequestBody User user) {
+        return userService.updateUser(user);
     }
 
-    private boolean approveUser(User user) {
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-        if (user.getEmail().contains("@") && !user.getEmail().isEmpty() &&
-                !user.getLogin().isEmpty() && !user.getLogin().isBlank() &&
-                LocalDate.parse(user.getBirthday(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                        .isBefore(LocalDate.now())) {
-            return true;
-        } else {
-            throw new ValidationException("User validation error");
-        }
+    @PutMapping("/{id}/friends/{friendId}")
+    public String addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.addFriend(id, friendId);
     }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public String deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.deleteFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable Integer id){
+        return userService.deleteUser(id);
+    }
+
 }

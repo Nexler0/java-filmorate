@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,7 +26,7 @@ class FilmorateApplicationTests {
 
     @BeforeEach
     void beforeEach() {
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(new FilmService(new InMemoryFilmStorage()));
     }
 
     private void accept(HttpClient client, HttpRequest get) {
