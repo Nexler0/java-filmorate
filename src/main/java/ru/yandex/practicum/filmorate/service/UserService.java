@@ -41,12 +41,12 @@ public class UserService {
         return user.deleteFriend(friendId);
     }
 
-    public User getUserById(int id){
+    public User getUserById(int id) {
         return inMemoryUserStorage.getUserById(id);
     }
 
     public List<User> getCommonFriends(Integer id, Integer otherId) {
-        return inMemoryUserStorage.getCommonFriends(id,  otherId);
+        return inMemoryUserStorage.getCommonFriends(id, otherId);
     }
 
     public List<User> getAllUserFriends(int id) {

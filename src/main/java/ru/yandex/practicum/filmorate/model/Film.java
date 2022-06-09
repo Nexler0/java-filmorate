@@ -27,6 +27,8 @@ public class Film {
     private final int duration;
     private int rate;
     private List<Integer> likesId;
+    private Genre genre;
+    private Rate filmRate;
 
     public Film(String name, String description, String releaseDate, int duration) {
         this.name = name;
