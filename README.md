@@ -23,13 +23,13 @@ FROM users;
 2. Получение списка всех фильмов:
 ```
 SELECT *
-FROM film;
+FROM films;
 ```
 3. Получение N популярных фильмов:
 ```   
 SELECT f.name,  
 COUNT(l.user_id) AS rate
-FROM film AS f
+FROM films AS f
 JOIN likes AS l ON f.film_id = l.film_id
 GROUP BY  f.name
 ORDER BY  rate DESC
@@ -38,7 +38,8 @@ LIMIT N;
 4. Получение списка общих друзей:
 ```
 SELECT u.name
-FROM user."НЕОБХОДИМЫЙ ID".friends AS f
-JOIN user."НЕОБХОДИМЫЙ ID 2".friends AS f2 ON f.user_id = f2.user_id
+FROM friends."НЕОБХОДИМЫЙ ID" AS f1
+JOIN friends."ДРУГОЙ ID" AS f2 ON f.friend_id = f2.friend_id
+JOIN users AS u ON f.friend_id = u.user_id
 GROUP BY u.name;
 ```
