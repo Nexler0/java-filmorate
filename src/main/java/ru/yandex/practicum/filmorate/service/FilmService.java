@@ -9,37 +9,37 @@ import java.util.List;
 @Service
 public class FilmService {
 
-    private final FilmStorage inMemoryFilmStorage;
+    private final FilmStorage filmStorage;
 
-    public FilmService(FilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmService(FilmStorage filmDbStorage) {
+        this.filmStorage = filmDbStorage;
     }
 
     public List<Film> findAllFilms() {
-        return inMemoryFilmStorage.findAllFilms();
+        return filmStorage.findAllFilms();
     }
 
     public Film addFilm(Film film) {
-        return inMemoryFilmStorage.addFilm(film);
+        return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        return inMemoryFilmStorage.updateFilm(film);
+        return filmStorage.updateFilm(film);
     }
 
     public List<Film> getPopularFilms(int count) {
-        return inMemoryFilmStorage.getPopularFilms(count);
+        return filmStorage.getPopularFilms(count);
     }
 
     public Film getFilmById(int id) {
-        return inMemoryFilmStorage.getFilmById(id);
+        return filmStorage.getFilmById(id);
     }
 
     public String likeTheMovie(Integer id, Integer userId) {
-        return inMemoryFilmStorage.likeTheMovie(id, userId);
+        return filmStorage.likeTheMovie(id, userId);
     }
 
     public String deleteTheMovieLike(Integer id, Integer userId) {
-        return inMemoryFilmStorage.deleteTheMovieLike(id, userId);
+        return filmStorage.deleteTheMovieLike(id, userId);
     }
 }

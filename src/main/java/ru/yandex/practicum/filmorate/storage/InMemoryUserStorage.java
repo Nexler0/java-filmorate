@@ -30,13 +30,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public String createUser(User user) {
+    public User createUser(User user) {
         if (approveUser(user)) {
             userIdCount++;
             user.setId(userIdCount);
             users.put(user.getId(), user);
             log.info("User created {}", gson.toJson(user));
-            return gson.toJson(user);
+            return user;
         } else {
             throw new ValidationException("User validation error");
         }
@@ -84,7 +84,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getCommonFriends(Integer id, Integer otherId) {
+    public List<User> getCommonFriends(int id, int otherId) {
         List<Integer> userFriendId = users.get(id).getAllFriends();
         List<User> commonFriends = new ArrayList<>();
         if (id > 0 || otherId > 0 || users.get(id).getAllFriends().size() != 0
@@ -98,6 +98,16 @@ public class InMemoryUserStorage implements UserStorage {
         } else {
             throw new EmptyUsersFriendListException("Ошибка в id пользователей");
         }
+    }
+
+    @Override
+    public User addFriend(int userId, int friendId) {
+        return null;
+    }
+
+    @Override
+    public User deleteFriend(int userId, int friendId) {
+        return null;
     }
 
     private boolean approveUser(User user) {

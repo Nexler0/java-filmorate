@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
 public enum FriendshipStatus {
-    CONFIRMED("Подтвержденная"),
-    UNCONFIRMED("Не подтвержденная");
+    CONFIRMED("CONFIRMED"),
+    UNCONFIRMED("UNCONFIRMED");
 
     private final String status;
 

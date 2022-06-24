@@ -9,51 +9,45 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private final UserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
 
-    public UserService(UserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserService(UserStorage userDbStorage) {
+        this.userStorage = userDbStorage;
     }
 
     public List<User> getAllUsers() {
-        return inMemoryUserStorage.getAllUsers();
+        return userStorage.getAllUsers();
     }
 
-    public String createUser(User user) {
-        return inMemoryUserStorage.createUser(user);
+    public User createUser(User user) {
+        return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
-        return inMemoryUserStorage.updateUser(user);
+        return userStorage.updateUser(user);
     }
 
-    public String addFriend(int userId, int friendId) {
-        User user = inMemoryUserStorage.getUserById(userId);
-        User friend = inMemoryUserStorage.getUserById(friendId);
-        friend.addFriend(userId);
-        return user.addFriend(friendId);
+    public User addFriend(int userId, int friendId) {
+        return userStorage.addFriend(userId, friendId);
     }
 
-    public String deleteFriend(int userId, int friendId) {
-        User user = inMemoryUserStorage.getUserById(userId);
-        User friend = inMemoryUserStorage.getUserById(friendId);
-        friend.deleteFriend(userId);
-        return user.deleteFriend(friendId);
+    public User deleteFriend(int userId, int friendId) {
+        return userStorage.deleteFriend(userId, friendId);
     }
 
     public User getUserById(int id) {
-        return inMemoryUserStorage.getUserById(id);
+        return userStorage.getUserById(id);
     }
 
     public List<User> getCommonFriends(Integer id, Integer otherId) {
-        return inMemoryUserStorage.getCommonFriends(id, otherId);
+        return userStorage.getCommonFriends(id, otherId);
     }
 
     public List<User> getAllUserFriends(int id) {
-        return inMemoryUserStorage.getAllUserFriendsById(id);
+        return userStorage.getAllUserFriendsById(id);
     }
 
     public String deleteUser(Integer id) {
-        return inMemoryUserStorage.deleteUserById(id);
+        return userStorage.deleteUserById(id);
     }
 }

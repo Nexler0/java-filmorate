@@ -27,13 +27,13 @@ FROM films;
 ```
 3. Получение N популярных фильмов:
 ```   
-SELECT f.name,  
-COUNT(l.user_id) AS rate
-FROM films AS f
-JOIN likes AS l ON f.film_id = l.film_id
-GROUP BY  f.name
-ORDER BY  rate DESC
-LIMIT N;
+SELECT *, G2.GENRE_ID AS GENRE_ID,
+"R.RATE_ID AS RATE_ID
+FROM FILMS
+LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID
+LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID
+LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE
+ORDER BY USER_RATE DESC LIMIT ?
 ```
 4. Получение списка общих друзей:
 ```
