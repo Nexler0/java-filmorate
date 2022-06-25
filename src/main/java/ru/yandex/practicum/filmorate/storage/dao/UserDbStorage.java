@@ -101,11 +101,21 @@ public class UserDbStorage implements UserStorage {
                     "UPDATE USERS SET EMAIL = ?, NAME = ?, LOGIN = ?, BIRTHDAY = ? WHERE USER_ID = ?",
                     user.getEmail(), user.getName(), user.getLogin(), user.getBirthday(), user.getId()
             );
-            for (int friend_id : user.getFriendsList()) {
-                jdbcT.update(
-                        "INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIENDSHIP_STATUS) " +
-                                "VALUES (?, ?, 2)", user.getId(), friend_id
-                );
+            for (int friendId : user.getFriendsList()) {
+                User friend = getUserById(friendId);
+                if (friend.getAllFriends().contains(user.getId())) {
+                    String deleteFromFriends = "DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?";
+                    jdbcT.update(deleteFromFriends, user.getId(), friendId);
+                    jdbcT.update(deleteFromFriends, friendId, user.getId());
+                    String insertFriends = "INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIENDSHIP_STATUS) VALUES (?,?,1)";
+                    jdbcT.update(insertFriends, user.getId(), friendId);
+                    jdbcT.update(insertFriends, friendId, user.getId());
+                } else {
+                    jdbcT.update(
+                            "INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIENDSHIP_STATUS) " +
+                                    "VALUES (?, ?, 2)", user.getId(), friendId
+                    );
+                }
             }
 
             log.info("Пользователь c Id:{} обновлен", user.getId());
@@ -204,9 +214,9 @@ public class UserDbStorage implements UserStorage {
         User user = getUserById(userId);
         if (getUserById(friendId) != null) {
             user.addFriend(friendId);
-            updateUser(user);
+            user = updateUser(user);
         }
-        return updateUser(user);
+        return user;
     }
 
     @Override
@@ -214,8 +224,20 @@ public class UserDbStorage implements UserStorage {
         User user = getUserById(userId);
         if (getUserById(friendId) != null) {
             user.deleteFriend(friendId);
-            updateUser(user);
+            user = updateUser(user);
         }
-        return updateUser(user);
+        return user;
+    }
+
+    public String getFriendshipStatus(int userId, int friendId) {
+        SqlRowSet statusRow = jdbcT.queryForRowSet(
+                "SELECT FS.NAME AS STATUS FROM FRIENDS " +
+                        "JOIN FRIENDSHIP_STATUS FS on FS.STATUS_ID = FRIENDS.FRIENDSHIP_STATUS " +
+                        "WHERE USER_ID = ? AND FRIEND_ID =? ", userId, friendId
+        );
+        if (statusRow.next()) {
+            return statusRow.getString("STATUS");
+        }
+        throw new NotFoundException("Статус не найден");
     }
 }

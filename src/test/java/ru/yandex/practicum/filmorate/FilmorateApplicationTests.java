@@ -117,6 +117,7 @@ class FilmoRateApplicationTests {
 
         userStorage.getAllUsers().forEach(System.out::println);
         userStorage.getCommonFriends(1,2).forEach(System.out::println);
+        System.out.println(userStorage.getFriendshipStatus(1, 2));
     }
 
     @Test
