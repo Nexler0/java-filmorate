@@ -66,7 +66,7 @@ public class UserDbStorage implements UserStorage {
                 if (count.next()) {
                     userId = count.getInt("COUNT");
                 }
-                log.info("Последний ID: " + userId);
+                log.info("Последний ID:{} ", userId);
                 if (user.getId() == 0 || user.getId() < 0 || user.getId() >= userId) {
                     userId++;
                     user.setId(userId);
@@ -210,7 +210,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User addFriend(int userId, int friendId) {
+    public User addFriendToUserFriendList(int userId, int friendId) {
         User user = getUserById(userId);
         if (getUserById(friendId) != null) {
             user.addFriend(friendId);
@@ -220,7 +220,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User deleteFriend(int userId, int friendId) {
+    public User deleteFriendFromUserFriendList(int userId, int friendId) {
         User user = getUserById(userId);
         if (getUserById(friendId) != null) {
             user.deleteFriend(friendId);

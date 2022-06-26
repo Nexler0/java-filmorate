@@ -25,9 +25,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmoRateApplicationTests {
     private final UserDbStorage userStorage;
     private final FilmDbStorage filmStorage;
-    private final JdbcTemplate jdbcT;
-
-
 
     @Test
     public void testAddFilmAndUser() {
@@ -109,11 +106,11 @@ class FilmoRateApplicationTests {
         userStorage.createUser(user3);
         userStorage.createUser(user4);
 
-        userStorage.addFriend(1,2);
-        userStorage.addFriend(1, 3);
-        userStorage.addFriend(2,1);
-        userStorage.addFriend(2,3);
-        userStorage.addFriend(1, 4);
+        userStorage.addFriendToUserFriendList(1,2);
+        userStorage.addFriendToUserFriendList(1, 3);
+        userStorage.addFriendToUserFriendList(2,1);
+        userStorage.addFriendToUserFriendList(2,3);
+        userStorage.addFriendToUserFriendList(1, 4);
 
         userStorage.getAllUsers().forEach(System.out::println);
         userStorage.getCommonFriends(1,2).forEach(System.out::println);
@@ -131,11 +128,11 @@ class FilmoRateApplicationTests {
         userStorage.createUser(user3);
         userStorage.createUser(user4);
 
-        userStorage.addFriend(1,2);
-        userStorage.addFriend(1, 3);
-        userStorage.addFriend(1, 4);
+        userStorage.addFriendToUserFriendList(1,2);
+        userStorage.addFriendToUserFriendList(1, 3);
+        userStorage.addFriendToUserFriendList(1, 4);
         userStorage.getAllUserFriendsById(1).forEach(System.out::println);
-        System.out.println(userStorage.deleteFriend(1, 3));
+        System.out.println(userStorage.deleteFriendFromUserFriendList(1, 3));
         userStorage.getAllUserFriendsById(1).forEach(System.out::println);
     }
 }

@@ -1,16 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.gson.annotations.JsonAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.serializer.CustomMpaDeserialize;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;

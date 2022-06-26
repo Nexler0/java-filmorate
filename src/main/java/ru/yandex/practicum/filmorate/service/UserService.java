@@ -27,12 +27,12 @@ public class UserService {
         return userStorage.updateUser(user);
     }
 
-    public User addFriend(int userId, int friendId) {
-        return userStorage.addFriend(userId, friendId);
+    public User addFriendToUserFriendList(int userId, int friendId) {
+        return userStorage.addFriendToUserFriendList(userId, friendId);
     }
 
-    public User deleteFriend(int userId, int friendId) {
-        return userStorage.deleteFriend(userId, friendId);
+    public User deleteFriendFromUserFriendList(int userId, int friendId) {
+        return userStorage.deleteFriendFromUserFriendList(userId, friendId);
     }
 
     public User getUserById(int id) {

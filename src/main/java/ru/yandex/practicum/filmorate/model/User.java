@@ -57,13 +57,6 @@ public class User {
         return new ArrayList<>(friendsList);
     }
 
-    public List<Integer> findFriendById(int id) {
-        if (!friendsList.isEmpty() && friendsList.contains(id)) {
-            return friendsList;
-        }
-        throw new RuntimeException("Ошибка хранилища");
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -48,7 +48,7 @@ public class FilmDbStorage implements FilmStorage {
         if (userRow.next()) {
             filmId = userRow.getInt("SUM");
         }
-        log.info("Последний ID: " + filmId);
+        log.info("Последний ID:{} ", filmId);
         if (film.getId() == 0 || film.getId() < 0 || film.getId() >= filmId) {
             filmId++;
             film.setId(filmId);
