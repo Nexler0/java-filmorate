@@ -42,4 +42,8 @@ public class FilmService {
     public String deleteTheMovieLike(Integer id, Integer userId) {
         return filmStorage.deleteTheMovieLike(id, userId);
     }
+
+    public String deleteTheMovie(int id) {
+        return filmStorage.deleteTheMovie(id);
+    }
 }

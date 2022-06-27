@@ -176,15 +176,16 @@ public class UserDbStorage implements UserStorage {
         );
         if (userRow.next()) {
             jdbcT.update(
-                    "DELETE FROM USERS WHERE USER_ID = ?", id
+                    "DELETE FROM FRIENDS WHERE USER_ID = ?", id
             );
             jdbcT.update(
-                    "DELETE FROM FRIENDS WHERE USER_ID = ?", id
+                    "DELETE FROM USERS WHERE USER_ID = ?", id
             );
             log.info("Пользователь c id:{} удален", id);
             return String.format("Пользователь c id:%s удален", id);
+        } else {
+            throw new NotFoundException("Пользователь не найден");
         }
-        throw new NotFoundException("Пользователь не найден");
     }
 
     @Override

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -74,6 +73,8 @@ class FilmoRateApplicationTests {
         filmStorage.addFilm(film5);
         filmStorage.getPopularFilms(2).forEach(System.out::println);
         assertEquals(List.of(film, film4), filmStorage.getPopularFilms(2));
+        filmStorage.deleteTheMovie(2);
+        filmStorage.findAllFilms().forEach(System.out::println);
     }
 
     @Test
@@ -134,5 +135,7 @@ class FilmoRateApplicationTests {
         userStorage.getAllUserFriendsById(1).forEach(System.out::println);
         System.out.println(userStorage.deleteFriendFromUserFriendList(1, 3));
         userStorage.getAllUserFriendsById(1).forEach(System.out::println);
+        userStorage.deleteUserById(1);
+        userStorage.getAllUsers().forEach(System.out::println);
     }
 }

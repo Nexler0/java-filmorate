@@ -53,4 +53,9 @@ public class FilmController {
     public String deleteTheMovieLike(@PathVariable Integer id, @PathVariable Integer userId) {
         return filmService.deleteTheMovieLike(id, userId);
     }
+
+    @DeleteMapping("/{id}")
+    public String deleteTheMovie(@PathVariable int id){
+        return filmService.deleteTheMovie(id);
+    }
 }

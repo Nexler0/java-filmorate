@@ -104,6 +104,18 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public String deleteTheMovie(int id) {
+        if (getFilmById(id) != null) {
+            jdbcT.update("DELETE FROM FILMS_GENRE WHERE FILM_ID = ?", id);
+            jdbcT.update("DELETE FROM FILMS WHERE FILM_ID = ?", id);
+            log.info("Фильм c id:{} удален", id);
+            return String.format("Фильм c id:%s удален", id);
+        } else {
+            throw new NotFoundException("Фильм не найден");
+        }
+    }
+
+    @Override
     public String deleteTheMovieLike(Integer id, Integer userId) {
         Film film = getFilmFromDbById(id);
         film.deleteUserLike(userId);
@@ -213,7 +225,7 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             for (Genre genre : film.getGenres())
                 film1.addGenre(genre);
-        } else if (film.getGenres() != null && film.getGenres().isEmpty()){
+        } else if (film.getGenres() != null && film.getGenres().isEmpty()) {
             film1.createGenreStorage();
         }
         return film1;

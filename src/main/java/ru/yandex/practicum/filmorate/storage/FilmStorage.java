@@ -19,4 +19,6 @@ public interface FilmStorage {
     String likeTheMovie(Integer id, Integer userId);
 
     String deleteTheMovieLike(Integer id, Integer userId);
+
+    String deleteTheMovie(int id);
 }
