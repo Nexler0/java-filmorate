@@ -4,37 +4,33 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 
 @Data
-public class Genre {
+public class Mpa {
     private int id;
     private String name;
 
-    public Genre() {
+    public Mpa() {
     }
 
-    public Genre(int id) {
+    public Mpa(int id) {
         this.id = id;
-
-        switch (id) {
+        switch (id){
             case 1:
-                name = "Комедия";
+                name = "G";
                 break;
             case 2:
-                name = "Драма";
+                name = "PG";
                 break;
             case 3:
-                name = "Мультфильм";
+                name = "PG-13";
                 break;
             case 4:
-                name = "Триллер";
+                name = "R";
                 break;
             case 5:
-                name = "Документальный";
-                break;
-            case 6:
-                name = "Боевик";
+                name = "NC-17";
                 break;
             default:
-                throw new NotFoundException("Такого Id нет");
+                throw new NotFoundException("Такого ID нет");
         }
     }
 }

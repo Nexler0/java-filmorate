@@ -6,10 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Data
 @Validated
@@ -27,37 +24,56 @@ public class Film {
     private final int duration;
     private int rate;
     private List<Integer> likesId;
-    private Genre genre;
-    private Rate filmRate;
+    private Mpa mpa;
+    private List<Genre> genres;
 
-    public Film(String name, String description, String releaseDate, int duration) {
+
+    public Film(String name, String releaseDate, String description, int duration, int rate) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.rate = rate;
         likesId = new ArrayList<>();
     }
 
-    public String addUserLike(int userId){
+    public String addUserLike(int userId) {
         rate++;
         likesId.add(userId);
         return String.format("Пользователь c id: %s, добавил лайк", id);
     }
 
-    public String deleteUserLike(int userId){
+    public String deleteUserLike(int userId) {
         if (likesId.contains(userId)) {
             rate--;
-            Iterator<Integer> likesListId = likesId.iterator();
-            while (likesListId.hasNext()) {
-                if (likesListId.next() == userId) {
-                    likesListId.remove();
-                    break;
-                }
-            }
+            likesId.removeIf(id -> id == userId);
             return String.format("Пользователь c id: %s, удалил лайк", id);
         }
         throw new NotFoundException("Пользователь не найден");
     }
+
+    public void addGenre(Genre genre) {
+        if (genres == null) {
+            genres = new ArrayList<>();
+            genres.add(genre);
+        }
+        if (!genres.stream().anyMatch(genre1 -> genre1.getId() == genre.getId())) {
+            genres.add(genre);
+        }
+        genres.sort(new Comparator<Genre>() {
+            @Override
+            public int compare(Genre o1, Genre o2) {
+                return o1.getId() - o2.getId();
+            }
+        });
+    }
+
+    public void createGenreStorage(){
+        if (genres == null) {
+            genres = new ArrayList<>();
+        }
+    }
+
 
     @Override
     public boolean equals(Object o) {

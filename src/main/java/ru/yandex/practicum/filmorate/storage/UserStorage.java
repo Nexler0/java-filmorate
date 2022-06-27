@@ -8,7 +8,7 @@ public interface UserStorage {
 
     List<User> getAllUsers();
 
-    String createUser(User user);
+    User createUser(User user);
 
     User updateUser(User user);
 
@@ -18,5 +18,9 @@ public interface UserStorage {
 
     String deleteUserById(int id);
 
-    List<User> getCommonFriends(Integer id, Integer otherId);
+    List<User> getCommonFriends(int id, int otherId);
+
+    User addFriendToUserFriendList(int userId, int friendId);
+
+    User deleteFriendFromUserFriendList(int userId, int friendId);
 }
