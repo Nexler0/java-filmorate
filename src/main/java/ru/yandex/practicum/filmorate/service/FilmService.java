@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -45,5 +46,10 @@ public class FilmService {
 
     public String deleteTheMovie(int id) {
         return filmStorage.deleteTheMovie(id);
+    }
+
+    //Получить список рекомендованных фильмов для пользователя по id
+    public Collection<Film> getRecommendations(int id){
+        return filmStorage.getRecommendations(id);
     }
 }

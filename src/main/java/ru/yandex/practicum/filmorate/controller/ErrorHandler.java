@@ -1,14 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exceptions.EmptyFilmsListException;
-import ru.yandex.practicum.filmorate.exceptions.EmptyUsersFriendListException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 
 @RestControllerAdvice
+@Slf4j
 public class ErrorHandler {
 
     @ExceptionHandler(ValidationException.class)
@@ -27,6 +26,14 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse incorrectParameter(final RuntimeException e){
         return new ErrorResponse("Error", String.format("Ошибка “%s”", e.getMessage()));
+    }
+
+    @ExceptionHandler({GetRecommendedFilmsErrorException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse GetRecommendedFilmsErrorExceptionHandler (final GetRecommendedFilmsErrorException exception){
+        log.warn("Error: {}, Description: {}, message: {}", exception.getError(), exception.getDescription(),
+                exception.getMessage());
+        return new ErrorResponse(exception.getError(), exception.getDescription());
     }
 }
 

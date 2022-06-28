@@ -2,16 +2,21 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.GetRecommendedFilmsErrorException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -21,6 +26,29 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcT;
     private static int filmId = 0;
+
+    private final String SQL_GET_RECOMMENDED_FILM_ID_LIST =
+            "WITH films_liked(film_id) AS (" +
+                    "    SELECT likes.film_id" +
+                    "    FROM likes" +
+                    "    WHERE likes.user_id = ?)," +
+                    "" +
+                    "    common_likes_users (user_id, matches) AS (" +
+                    "        SELECT user_id, count(*)" +
+                    "        FROM likes" +
+                    "        WHERE film_id IN (SELECT * FROM films_liked)" +
+                    "            AND user_id <> ?" +
+                    "        GROUP BY user_id" +
+                    "        ORDER BY count(*) DESC)" +
+                    "" +
+                    "SELECT film_id, SUM(common_likes_users.matches) AS rate " +
+                    "FROM likes " +
+                    "    RIGHT JOIN common_likes_users" +
+                    "        ON likes.user_id = common_likes_users.user_id " +
+                    "WHERE likes.user_id IN (SELECT user_id FROM common_likes_users)" +
+                    "    AND film_id NOT IN (SELECT * FROM films_liked)" +
+                    "GROUP BY film_id " +
+                    "ORDER BY rate DESC";
 
     public FilmDbStorage(JdbcTemplate jdbcT) {
         this.jdbcT = jdbcT;
@@ -265,5 +293,37 @@ public class FilmDbStorage implements FilmStorage {
         }
         log.info("Нашлось {} в хранилище фильмов", filmList.size());
         return filmList;
+    }
+
+    /*
+     *Возвращает список фильмов, рекомендованных к просмотру пользователю.
+     * Алгоритм:
+     * 1. Запрос в БД список лайков фильмов пользователем;
+     * 2. Запрос в БД список пользователей с лайками фильмов совпадающих с выбором пользователя
+     *с количеством совпавших лайков;
+     * 3. Запрос в БД списка id рекомендованных фильмов в порядке приоритета. Список фильмов формируется из фильмов
+     * для которых пользователи с совпадающими лайками поставили лайк, а пользователь нет. Приоритет выставляется в
+     * соответствии с рейтингом, который формируется как сумма лайков пользователей со схожими с пользователем вкусами
+     * с учетом весового коэффициента. В качестве весового коэффициента используется количество совпадений по лайкам у
+     * пользователя с пользователями с похожими вкусами.
+     */
+    @Override
+    public Collection<Film> getRecommendations(int id) {
+        Collection<Film> recommendedFilms;
+
+        try {
+            recommendedFilms = jdbcT.query(SQL_GET_RECOMMENDED_FILM_ID_LIST, this::makeRecommendedFilm, id);
+        } catch (DataAccessException exception) {
+            throw new GetRecommendedFilmsErrorException(exception.getMessage(), "Ошибка при запросе в БД",
+                    "Запрос списка рекомендованных к просмотру фильмов для пользователя id: " + id);
+        }
+
+        log.trace("Список рекомендованных фильмов для пользователя id={} создан", id);
+
+        return recommendedFilms;
+    }
+
+    private Film makeRecommendedFilm(ResultSet rs, int rowNum) throws SQLException {
+        return this.getFilmById(rs.getInt("film_id"));
     }
 }
