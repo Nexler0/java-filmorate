@@ -26,6 +26,7 @@ public class Film {
     private List<Integer> likesId;
     private Mpa mpa;
     private List<Genre> genres;
+    private List<Director> directors;
 
 
     public Film(String name, String releaseDate, String description, int duration, int rate) {

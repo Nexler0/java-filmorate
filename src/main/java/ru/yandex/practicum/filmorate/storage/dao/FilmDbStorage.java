@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -53,6 +54,7 @@ public class FilmDbStorage implements FilmStorage {
             filmId++;
             film.setId(filmId);
         }
+
         return insertFilmInDb(film);
     }
 
@@ -192,6 +194,20 @@ public class FilmDbStorage implements FilmStorage {
                 );
             }
         }
+        //Добавление директора к фильму если он есть в теле
+        if (film.getDirectors() != null){
+            List<Director> listOfDirectors = film.getDirectors();
+            if (listOfDirectors.isEmpty()){
+                for (Director director : listOfDirectors) {
+                    jdbcT.update(
+                            "UPDATE FILMS SET DIRECTOR_ID = ? " +
+                                    "WHERE FILM_ID = ? ",  director.getId(), film.getId());
+                }
+            }
+
+        }
+
+
 
         return film;
     }
