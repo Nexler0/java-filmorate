@@ -312,7 +312,7 @@ public class FilmDbStorage implements FilmStorage {
         Collection<Film> recommendedFilms;
 
         try {
-            recommendedFilms = jdbcT.query(SQL_GET_RECOMMENDED_FILM_ID_LIST, this::makeRecommendedFilm, id);
+            recommendedFilms = jdbcT.query(SQL_GET_RECOMMENDED_FILM_ID_LIST, this::makeRecommendedFilm, id, id);
         } catch (DataAccessException exception) {
             throw new GetRecommendedFilmsErrorException(exception.getMessage(), "Ошибка при запросе в БД",
                     "Запрос списка рекомендованных к просмотру фильмов для пользователя id: " + id);
