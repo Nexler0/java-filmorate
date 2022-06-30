@@ -5,7 +5,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.director.Director;
+import ru.yandex.practicum.filmorate.model.director.FilmDirector;
 import ru.yandex.practicum.filmorate.storage.DirectorDao;
+import ru.yandex.practicum.filmorate.storage.FilmDirectorsDao;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -17,9 +19,11 @@ import java.util.Optional;
 public class DirectorController {
 
     private final DirectorDao directorDao;
+    private final FilmDirectorsDao filmDirectorsDao;
 
-    public DirectorController(DirectorDao directorDao) {
+    public DirectorController(DirectorDao directorDao, FilmDirectorsDao filmDirectorsDao) {
         this.directorDao = directorDao;
+        this.filmDirectorsDao = filmDirectorsDao;
     }
 
     /**
@@ -29,7 +33,7 @@ public class DirectorController {
      * @return
      */
     @PostMapping
-    public Director create(@Valid @RequestBody Director director){
+    public Director create(@RequestBody Director director){
         log.info("Получен запрос к эндпоинту /directors. Метод POST");
         if (director.getName().isBlank() || director.getName() == null) {
             throw new ValidationException("Необходимо указать имя директора!");
@@ -48,7 +52,7 @@ public class DirectorController {
      * @return
      */
     @GetMapping("/{id}")
-    public Optional<Director> directorById(@Valid @PathVariable("id") Long directorId) {
+    public Optional<Director> directorById(@PathVariable("id") Long directorId) {
         if (directorDao.containsById(directorId)) {
             return directorDao.getDirById(directorId);
         } else {
@@ -64,7 +68,7 @@ public class DirectorController {
      * @return
      */
     @PutMapping
-    public Optional<Director> update(@Valid @RequestBody Director director) {
+    public Optional<Director> update(@RequestBody Director director) {
         log.info("Получен запрос к эндпоинту /users. Метод PUT");
         if (director.getId() > 0) {
             if (directorDao.containsById(director.getId())){
@@ -95,7 +99,12 @@ public class DirectorController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public String deleteDirector(@Valid @PathVariable("id") Long directorId) {
+    public String deleteDirector(@PathVariable("id") Long directorId) {
+        //Удаление связности из таблиц сначала удалили из сопоставления, потом удалили из директора
+        List<FilmDirector> listFilmOfDirector = filmDirectorsDao.findFilmByDirector(directorId);
+        for (FilmDirector filmDirector : listFilmOfDirector) {
+            filmDirectorsDao.deleteDirectorFromFilm(filmDirector.getFilmId(), directorId);
+        }
         if (directorDao.containsById(directorId)){
             directorDao.deleteDirector(directorId);
             return "Директор удален с Id = " + directorId;

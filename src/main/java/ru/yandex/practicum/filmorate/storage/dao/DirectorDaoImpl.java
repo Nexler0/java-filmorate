@@ -70,6 +70,11 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public void deleteDirector(Long id) {
+//        log.info("Рейтинг у фильма {} повышен.", idFilm);
+//        String sql = "UPDATE films SET rate = rate + 1 WHERE id = ?";
+//        Object[] args = new Object[] {idFilm};
+//        jdbcTemplate.update(sql, args);
+
         String sql = "DELETE FROM DIRECTORS WHERE id = ?";
         Object[] args = new Object[] {id};
         log.info("Директор с идентификатором {} удален.", id);

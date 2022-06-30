@@ -65,4 +65,17 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
                 .directorsId(rs.getLong("DIRECTOR_ID"))
                 .build();
     }
+
+    @Override
+    public List<FilmDirector> findFilmByDirector(Long directorId) {
+        String sql = "SELECT * from FILMS_DIRECTORS WHERE DIRECTOR_ID = " + directorId;
+        log.info("Запрос на получение всех фильмов у директора.");
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirectorFilms(rs));
+    }
+    private FilmDirector makeDirectorFilms(ResultSet rs) throws SQLException {
+        return FilmDirector.builder()
+                .filmId(rs.getLong("FILM_ID"))
+                .directorsId(rs.getLong("DIRECTOR_ID"))
+                .build();
+    }
 }

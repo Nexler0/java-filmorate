@@ -42,4 +42,12 @@ public interface FilmDirectorsDao {
      * @return
      */
     List<FilmDirector> findDirectorByFilms(Long filmId);
+
+    /**
+     * Найти все фильмы по ID диретора
+     * Find all films by id of directors
+     * @param directorId
+     * @return
+     */
+    List<FilmDirector> findFilmByDirector(Long directorId);
 }
