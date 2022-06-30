@@ -100,7 +100,7 @@ public class DirectorController {
      */
     @DeleteMapping("/{id}")
     public String deleteDirector(@PathVariable("id") Long directorId) {
-        //Удаление связности из таблиц сначала удалили из сопоставления, потом удалили из директора
+        //Удаление связности из таблиц, сначала удалили из сопоставления, потом удалили из директора
         List<FilmDirector> listFilmOfDirector = filmDirectorsDao.findFilmByDirector(directorId);
         for (FilmDirector filmDirector : listFilmOfDirector) {
             filmDirectorsDao.deleteDirectorFromFilm(filmDirector.getFilmId(), directorId);
@@ -113,6 +113,8 @@ public class DirectorController {
         }
 
     }
+
+    //GET /films/director/{directorId}?sortBy=[year,likes]
 
 
 
