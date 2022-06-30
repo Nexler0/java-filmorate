@@ -27,7 +27,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcT;
     private static int filmId = 0;
 
-    private final String SQL_GET_RECOMMENDED_FILM_ID_LIST =
+    private static final String SQL_GET_RECOMMENDED_FILM_ID_LIST =
             "WITH films_liked(film_id) AS (" +
                     "    SELECT likes.film_id" +
                     "    FROM likes" +
