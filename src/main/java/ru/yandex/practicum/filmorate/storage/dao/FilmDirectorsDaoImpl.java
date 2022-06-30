@@ -56,7 +56,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     @Override
     public List<FilmDirector> findDirectorByFilms(Long filmId) {
         String sql = "SELECT * from FILMS_DIRECTORS WHERE FILM_ID = " + filmId;
-        log.info("Запрос на получение всех жанров у фильма.");
+        log.info("Запрос на получение всех директоров у фильма.");
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmDirectors(rs));
     }
     private FilmDirector makeFilmDirectors(ResultSet rs) throws SQLException {

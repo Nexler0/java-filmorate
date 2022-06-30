@@ -151,6 +151,8 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
                         "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
                         "LEFT JOIN LIKES AS L on FG.FILM_ID = L.FILM_ID " +
+                        "LEFT JOIN FILMS_DIRECTORS AS FD on FILMS.FILM_ID = FD.FILM_ID " +
+                        "LEFT JOIN DIRECTORS D on D.ID = FD.DIRECTOR_ID " +
                         "WHERE FILMS.FILM_ID = ?", id
         );
         while (userRow.next()) {
@@ -162,6 +164,13 @@ public class FilmDbStorage implements FilmStorage {
             film.setId(userRow.getInt("FILM_ID"));
             film.setMpa(new Mpa(userRow.getInt("RATE_ID")));
             film.addUserLike(userRow.getInt("USER_LIKE"));
+            film.addDirector(Director.builder()
+                            .id(userRow.getLong("D.ID"))
+                            .name(userRow.getString("D.name"))
+                            .build());
+
+
+
         }
         if (film != null) {
             SqlRowSet genreRow = jdbcT.queryForRowSet(
@@ -170,10 +179,31 @@ public class FilmDbStorage implements FilmStorage {
             while (genreRow.next()) {
                 film.addGenre(new Genre(genreRow.getInt("GENRE_ID")));
             }
+            //Получение списка директоров для фильма
+//            SqlRowSet filmRows = jdbcT.queryForRowSet( "select * from FILMS where FILM_ID = ?", id);
+//            if (filmRows.next()){
+//                if (!filmDirectorsDao.findDirectorByFilms((long)id).isEmpty()){
+//                    List<FilmDirector> listOfDirectors = filmDirectorsDao.findDirectorByFilms((long)id);
+//                    List<Director> directors = new ArrayList<>();
+//                    for (FilmDirector filmDirector : listOfDirectors) {
+//                        directors.add(Director.builder()
+//                                .id(filmDirector.getDirectorsId())
+//                                .name(directorDao.getDirById(filmDirector.getDirectorsId()).get().getName())
+//                                .build());
+//                    }
+//                    film.setDirectors(directors);
+//                } else {
+//                    film.setDirectors(null);
+//                }
+//            }
             return film;
         } else {
             throw new NotFoundException("Фильм не найден");
         }
+
+
+
+
     }
 
     private Film insertFilmInDb(Film film) {
@@ -268,8 +298,7 @@ public class FilmDbStorage implements FilmStorage {
                         throw new NotFoundException("Такого директора в спике нет!");
                     }
                 }
-                film1.setDirectors(film1.getDirectors());
-//                return getFilmById(film1.getId());
+                return getFilmById(film1.getId());
             }else {
                 for (Director director : listOfDirectors) {
                     if (directorDao.containsById(director.getId())){
@@ -277,11 +306,9 @@ public class FilmDbStorage implements FilmStorage {
                     }else {
                         throw new NotFoundException("Такого директора в спике нет!");
                     }
-                    film1.setDirectors(film1.getDirectors());
-//                    return getFilmById(film1.getId());
+                    return getFilmById(film1.getId());
                 }
             }
-
         }
         return film1;
     }
@@ -302,6 +329,24 @@ public class FilmDbStorage implements FilmStorage {
             } catch (NotFoundException info) {
                 log.info("Фильм не имеет жанра");
             }
+            //Получение списка директоров для фильма
+//            SqlRowSet filmRows = jdbcT.queryForRowSet( "select * from FILMS where FILM_ID = ?", id);
+//            if (filmRows.next()){
+//                if (!filmDirectorsDao.findDirectorByFilms((long)id).isEmpty()){
+//                    List<FilmDirector> listOfDirectors = filmDirectorsDao.findDirectorByFilms((long)id);
+//                    List<Director> directors = new ArrayList<>();
+//                    for (FilmDirector filmDirector : listOfDirectors) {
+//                        directors.add(Director.builder()
+//                                .id(filmDirector.getDirectorsId())
+//                                .name(directorDao.getDirById(filmDirector.getDirectorsId()).get().getName())
+//                                .build());
+//                    }
+//                    film.setDirectors(directors);
+//                } else {
+//                    film.setDirectors(null);
+//                }
+//            }
+
             if (!filmList.contains(film)) {
                 filmList.add(film);
             } else {
@@ -319,6 +364,9 @@ public class FilmDbStorage implements FilmStorage {
                     .findAny().get().addUserLike(likesRow.getInt("USER_ID"));
         }
         log.info("Нашлось {} в хранилище фильмов", filmList.size());
+
+
+
         return filmList;
     }
 }
