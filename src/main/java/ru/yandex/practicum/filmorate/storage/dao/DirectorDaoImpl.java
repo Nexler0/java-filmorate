@@ -9,10 +9,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.director.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorDao;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -84,7 +83,6 @@ public class DirectorDaoImpl implements DirectorDao {
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirectors(rs));
 
     }
-
     private Director makeDirectors(ResultSet rs) throws SQLException {
         return Director.builder()
                 .id(rs.getLong("id"))

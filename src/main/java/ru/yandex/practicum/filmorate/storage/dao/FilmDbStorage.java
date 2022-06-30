@@ -6,10 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.director.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.director.FilmDirector;
+import ru.yandex.practicum.filmorate.storage.DirectorDao;
+import ru.yandex.practicum.filmorate.storage.FilmDirectorsDao;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.ArrayList;
@@ -21,10 +24,14 @@ import java.util.List;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcT;
+    private final FilmDirectorsDao filmDirectorsDao;
+    private final DirectorDao directorDao;
     private static int filmId = 0;
 
-    public FilmDbStorage(JdbcTemplate jdbcT) {
+    public FilmDbStorage(JdbcTemplate jdbcT, FilmDirectorsDao filmDirectorsDao, DirectorDao directorDao) {
         this.jdbcT = jdbcT;
+        this.filmDirectorsDao = filmDirectorsDao;
+        this.directorDao = directorDao;
     }
 
     @Override
@@ -197,11 +204,13 @@ public class FilmDbStorage implements FilmStorage {
         //Добавление директора к фильму если он есть в теле
         if (film.getDirectors() != null){
             List<Director> listOfDirectors = film.getDirectors();
-            if (listOfDirectors.isEmpty()){
+            if (!listOfDirectors.isEmpty()){
                 for (Director director : listOfDirectors) {
-                    jdbcT.update(
-                            "UPDATE FILMS SET DIRECTOR_ID = ? " +
-                                    "WHERE FILM_ID = ? ",  director.getId(), film.getId());
+                    if (directorDao.containsById(director.getId())){
+                        filmDirectorsDao.addDirectorToFilm((long) film.getId(), director.getId());
+                    }else {
+                        throw new NotFoundException("Такого директора в спике нет!");
+                    }
                 }
             }
 
@@ -243,6 +252,36 @@ public class FilmDbStorage implements FilmStorage {
                 film1.addGenre(genre);
         } else if (film.getGenres() != null && film.getGenres().isEmpty()) {
             film1.createGenreStorage();
+        }
+        //Добаление директора к фильму через Update
+        if (film1.getDirectors() != null){
+            List<Director> listOfDirectors = film1.getDirectors();
+            if (!listOfDirectors.isEmpty()){
+                List<FilmDirector> listDir = filmDirectorsDao.findDirectorByFilms((long) film1.getId());
+                for (FilmDirector filmDirector : listDir) {
+                    filmDirectorsDao.deleteDirectorFromFilm((long) film1.getId(), filmDirector.getDirectorsId());
+                }
+                for (Director director : listOfDirectors) {
+                    if (directorDao.containsById(director.getId())){
+                        filmDirectorsDao.addDirectorToFilm((long) film1.getId(), director.getId());
+                    }else {
+                        throw new NotFoundException("Такого директора в спике нет!");
+                    }
+                }
+                film1.setDirectors(film1.getDirectors());
+//                return getFilmById(film1.getId());
+            }else {
+                for (Director director : listOfDirectors) {
+                    if (directorDao.containsById(director.getId())){
+                        filmDirectorsDao.addDirectorToFilm((long) film1.getId(), director.getId());
+                    }else {
+                        throw new NotFoundException("Такого директора в спике нет!");
+                    }
+                    film1.setDirectors(film1.getDirectors());
+//                    return getFilmById(film1.getId());
+                }
+            }
+
         }
         return film1;
     }

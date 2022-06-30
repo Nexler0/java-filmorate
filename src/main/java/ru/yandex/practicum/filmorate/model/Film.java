@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.director.Director;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -72,6 +73,32 @@ public class Film {
     public void createGenreStorage(){
         if (genres == null) {
             genres = new ArrayList<>();
+        }
+    }
+
+    /**
+     * Добавление директора
+     * @param director
+     */
+    public void addDirector(Director director) {
+        if (directors == null) {
+            directors = new ArrayList<>();
+            directors.add(director);
+        }
+        if (!directors.stream().anyMatch(director1 -> director1.getId() == director.getId())) {
+            directors.add(director);
+        }
+        directors.sort(new Comparator<Director>() {
+            @Override
+            public int compare(Director o1, Director o2) {
+                return (int)o1.getId() - (int)o2.getId();
+            }
+        });
+    }
+
+    public void createDirectorsStorage(){
+        if (directors == null) {
+            directors = new ArrayList<>();
         }
     }
 
