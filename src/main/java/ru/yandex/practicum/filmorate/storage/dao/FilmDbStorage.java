@@ -436,23 +436,5 @@ public class FilmDbStorage implements FilmStorage {
         } else {
             throw new NotFoundException("Такого директора нет!");
         }
-
-
-//        public List<Film> getPopularFilms(int count) {
-//            List<Film> filmList = new ArrayList<>();
-//            SqlRowSet userRow = jdbcT.queryForRowSet(
-//                    "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
-//                            "R.RATE_ID AS RATE_ID " +
-//                            "FROM FILMS " +
-//                            "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-//                            "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-//                            "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-//                            "ORDER BY USER_RATE DESC LIMIT ? ", count
-//            );
-//            return getFilmsList(filmList, userRow);
-//        }
-
-
-
     }
 }
