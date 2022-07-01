@@ -75,11 +75,43 @@ class FilmoRateApplicationTests {
         film5.addGenre(new Genre(5));
         film5.setRate(7);
         filmStorage.addFilm(film5);
+        filmStorage.findAllFilms().forEach(System.out::println);
         filmStorage.getPopularFilms(2).forEach(System.out::println);
         assertEquals(List.of(film, film4), filmStorage.getPopularFilms(2));
         filmStorage.deleteTheMovie(2);
         filmStorage.findAllFilms().forEach(System.out::println);
     }
+
+    @Test
+    public void testGetFindAllFilms(){
+        Film film = new Film("Fake", "1999-06-15", "some things", 165, 5);
+        film.setMpa(new Mpa(2));
+        film.addGenre(new Genre(6));
+        film.setRate(10);
+        filmStorage.addFilm(film);
+        Film film2 = new Film("Fake2", "2001-06-15", "some things", 165, 5);
+        film2.setMpa(new Mpa(1));
+        film2.addGenre(new Genre(5));
+        film2.setRate(2);
+        filmStorage.addFilm(film2);
+        Film film3 = new Film("Fake3", "2004-06-15", "some things", 165, 5);
+        film3.setMpa(new Mpa(5));
+        film3.addGenre(new Genre(2));
+        film3.setRate(5);
+        filmStorage.addFilm(film3);
+        Film film4 = new Film("Fake4", "2006-06-15", "some things", 165, 5);
+        film4.setMpa(new Mpa(3));
+        film4.addGenre(new Genre(4));
+        film4.setRate(8);
+        filmStorage.addFilm(film4);
+        Film film5 = new Film("Fake5", "2008-06-15", "some things", 165, 5);
+        film5.setMpa(new Mpa(4));
+        film5.addGenre(new Genre(5));
+        film5.setRate(7);
+        filmStorage.addFilm(film5);
+        filmStorage.findAllFilms().forEach(System.out::println);
+    }
+
 
     @Test
     public void testUpdateFilm(){
