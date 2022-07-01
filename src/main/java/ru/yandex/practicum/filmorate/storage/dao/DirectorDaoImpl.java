@@ -38,7 +38,7 @@ public class DirectorDaoImpl implements DirectorDao {
             ps.setString(1, director.getName());
             return ps;
         }, keyHolder);
-        director.setId(keyHolder.getKey().longValue());
+        director.setId(keyHolder.getKey().intValue());
         log.info("Директор добавлен: ID {}, name {}", director.getId(), director.getName());
         return Optional.of(director);
     }
@@ -53,12 +53,12 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public Optional<Director> getDirById(Long id) {
+    public Optional<Director> getDirById(Integer id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from DIRECTORS where id = ?", id);
         if (userRows.next()){
-            log.info("Директор найден: {} {}", userRows.getLong("id"), userRows.getString("name"));
+            log.info("Директор найден: {} {}", userRows.getInt("id"), userRows.getString("name"));
             Director director = Director.builder()
-                    .id(userRows.getLong("id"))
+                    .id(userRows.getInt("id"))
                     .name(userRows.getString("name"))
                     .build();
             return Optional.of(director);
@@ -69,12 +69,7 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public void deleteDirector(Long id) {
-//        log.info("Рейтинг у фильма {} повышен.", idFilm);
-//        String sql = "UPDATE films SET rate = rate + 1 WHERE id = ?";
-//        Object[] args = new Object[] {idFilm};
-//        jdbcTemplate.update(sql, args);
-
+    public void deleteDirector(Integer id) {
         String sql = "DELETE FROM DIRECTORS WHERE id = ?";
         Object[] args = new Object[] {id};
         log.info("Директор с идентификатором {} удален.", id);
@@ -90,13 +85,13 @@ public class DirectorDaoImpl implements DirectorDao {
     }
     private Director makeDirectors(ResultSet rs) throws SQLException {
         return Director.builder()
-                .id(rs.getLong("id"))
+                .id(rs.getInt("id"))
                 .name(rs.getString("name"))
                 .build();
     }
 
     @Override
-    public boolean containsById(Long id) {
+    public boolean containsById(Integer id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet( "select * from DIRECTORS where id = ?", id);
         if (userRows.next()){
             return true;

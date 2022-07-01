@@ -34,7 +34,7 @@ public interface DirectorDao {
      *
      * @param id
      */
-    void deleteDirector(Long id);
+    void deleteDirector(Integer id);
 
     /**
      * Получение директора по его ID из БД
@@ -43,7 +43,7 @@ public interface DirectorDao {
      * @param id
      * @return
      */
-    Optional<Director> getDirById(Long id);
+    Optional<Director> getDirById(Integer id);
 
     /**
      * Метод получения всех директоров из БД
@@ -60,5 +60,5 @@ public interface DirectorDao {
      * @param id
      * @return
      */
-    boolean containsById(Long id);
+    boolean containsById(Integer id);
 }

@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FilmService {
@@ -45,5 +46,9 @@ public class FilmService {
 
     public String deleteTheMovie(int id) {
         return filmStorage.deleteTheMovie(id);
+    }
+
+    public List<Film> getSortByParamFilms(Integer directorId, Optional<String> param){
+        return filmStorage.getSortByParamFilms(directorId, param);
     }
 }

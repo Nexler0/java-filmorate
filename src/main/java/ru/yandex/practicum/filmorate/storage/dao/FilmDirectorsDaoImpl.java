@@ -25,7 +25,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     }
 
     @Override
-    public void addDirectorToFilm(Long filmId, Long directorId) {
+    public void addDirectorToFilm(Integer filmId, Integer directorId) {
         String insertQuery = "insert into FILMS_DIRECTORS (FILM_ID, DIRECTOR_ID) values (?, ?)";
         int status = jdbcTemplate.update(insertQuery, filmId, directorId);
         if(status != 0){
@@ -36,7 +36,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     }
 
     @Override
-    public void deleteDirectorFromFilm(Long filmId, Long directorId) {
+    public void deleteDirectorFromFilm(Integer filmId, Integer directorId) {
         String sql = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ? AND DIRECTOR_ID = ?";
         Object[] args = new Object[] {filmId, directorId};
         jdbcTemplate.update(sql, args);
@@ -44,7 +44,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     }
 
     @Override
-    public boolean containsDirectorInFilmById(Long filmId, Long directorId) {
+    public boolean containsDirectorInFilmById(Integer filmId, Integer directorId) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from FILMS_DIRECTORS where FILM_ID = ? AND DIRECTOR_ID = ?", filmId, directorId);
         if (userRows.next()){
             return true;
@@ -54,28 +54,28 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     }
 
     @Override
-    public List<FilmDirector> findDirectorByFilms(Long filmId) {
+    public List<FilmDirector> findDirectorByFilms(Integer filmId) {
         String sql = "SELECT * from FILMS_DIRECTORS WHERE FILM_ID = " + filmId;
         log.info("Запрос на получение всех директоров у фильма.");
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmDirectors(rs));
     }
     private FilmDirector makeFilmDirectors(ResultSet rs) throws SQLException {
         return FilmDirector.builder()
-                .filmId(rs.getLong("FILM_ID"))
-                .directorsId(rs.getLong("DIRECTOR_ID"))
+                .filmId(rs.getInt("FILM_ID"))
+                .directorsId(rs.getInt("DIRECTOR_ID"))
                 .build();
     }
 
     @Override
-    public List<FilmDirector> findFilmByDirector(Long directorId) {
+    public List<FilmDirector> findFilmByDirector(Integer directorId) {
         String sql = "SELECT * from FILMS_DIRECTORS WHERE DIRECTOR_ID = " + directorId;
         log.info("Запрос на получение всех фильмов у директора.");
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirectorFilms(rs));
     }
     private FilmDirector makeDirectorFilms(ResultSet rs) throws SQLException {
         return FilmDirector.builder()
-                .filmId(rs.getLong("FILM_ID"))
-                .directorsId(rs.getLong("DIRECTOR_ID"))
+                .filmId(rs.getInt("FILM_ID"))
+                .directorsId(rs.getInt("DIRECTOR_ID"))
                 .build();
     }
 }

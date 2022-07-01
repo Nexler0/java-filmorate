@@ -16,7 +16,7 @@ public interface FilmDirectorsDao {
      * @param filmId
      * @param directorId
      */
-    void addDirectorToFilm(Long filmId, Long directorId);
+    void addDirectorToFilm(Integer filmId, Integer directorId);
 
     /**
      * Удалить директора у фильма из DB
@@ -24,7 +24,7 @@ public interface FilmDirectorsDao {
      * @param filmId
      * @param directorId
      */
-    void deleteDirectorFromFilm(Long filmId, Long directorId);
+    void deleteDirectorFromFilm(Integer filmId, Integer directorId);
 
     /**
      * Проверка наличия директора у фильма
@@ -33,7 +33,7 @@ public interface FilmDirectorsDao {
      * @param directorId
      * @return
      */
-    boolean containsDirectorInFilmById(Long filmId, Long directorId);
+    boolean containsDirectorInFilmById(Integer filmId, Integer directorId);
 
     /**
      * Найти директоров по ид фильма в БД
@@ -41,7 +41,7 @@ public interface FilmDirectorsDao {
      * @param filmId
      * @return
      */
-    List<FilmDirector> findDirectorByFilms(Long filmId);
+    List<FilmDirector> findDirectorByFilms(Integer filmId);
 
     /**
      * Найти все фильмы по ID диретора
@@ -49,5 +49,5 @@ public interface FilmDirectorsDao {
      * @param directorId
      * @return
      */
-    List<FilmDirector> findFilmByDirector(Long directorId);
+    List<FilmDirector> findFilmByDirector(Integer directorId);
 }

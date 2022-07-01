@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @Builder
 public class Director {
-    private Long id;
+    private Integer id;
     @NotEmpty
     @NotNull
     private String name;

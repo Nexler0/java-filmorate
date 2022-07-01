@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.director.Director;
 import ru.yandex.practicum.filmorate.model.director.FilmDirector;
 import ru.yandex.practicum.filmorate.storage.DirectorDao;
@@ -52,7 +53,7 @@ public class DirectorController {
      * @return
      */
     @GetMapping("/{id}")
-    public Optional<Director> directorById(@PathVariable("id") Long directorId) {
+    public Optional<Director> directorById(@PathVariable("id") Integer directorId) {
         if (directorDao.containsById(directorId)) {
             return directorDao.getDirById(directorId);
         } else {
@@ -99,7 +100,7 @@ public class DirectorController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public String deleteDirector(@PathVariable("id") Long directorId) {
+    public String deleteDirector(@PathVariable("id") Integer directorId) {
         //Удаление связности из таблиц, сначала удалили из сопоставления, потом удалили из директора
         List<FilmDirector> listFilmOfDirector = filmDirectorsDao.findFilmByDirector(directorId);
         for (FilmDirector filmDirector : listFilmOfDirector) {
@@ -113,11 +114,5 @@ public class DirectorController {
         }
 
     }
-
-    //GET /films/director/{directorId}?sortBy=[year,likes]
-
-
-
-
 
 }
