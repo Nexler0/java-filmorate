@@ -76,27 +76,6 @@ public class Film {
         }
     }
 
-    /**
-     * Добавление директора
-     * @param director
-     */
-    public void addDirector(Director director) {
-        if (directors == null) {
-            directors = new ArrayList<>();
-            directors.add(director);
-        }
-        if (!directors.stream().anyMatch(director1 -> director1.getId().equals(director.getId()))) {
-            directors.add(director);
-        }
-        directors.sort(new Comparator<Director>() {
-            @Override
-            public int compare(Director o1, Director o2) {
-                return (int)(o1.getId() - o2.getId());
-            }
-
-        });
-    }
-
     public void createDirectorsStorage(){
         if (directors == null) {
             directors = new ArrayList<>();

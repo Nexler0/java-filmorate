@@ -48,7 +48,7 @@ public class FilmService {
         return filmStorage.deleteTheMovie(id);
     }
 
-    public List<Film> getSortByParamFilms(Integer directorId, Optional<String> param){
+    public List<Film> getSortByParamFilms(Integer directorId, String param){
         return filmStorage.getSortByParamFilms(directorId, param);
     }
 }

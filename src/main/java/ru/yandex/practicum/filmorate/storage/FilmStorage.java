@@ -30,5 +30,5 @@ public interface FilmStorage {
      * @param param
      * @return
      */
-    List<Film> getSortByParamFilms(Integer directorId, Optional<String> param);
+    List<Film> getSortByParamFilms(Integer directorId, String param);
 }
