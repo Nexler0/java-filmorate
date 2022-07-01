@@ -25,11 +25,6 @@ public class ReviewsController {
         return reviewsService.addReview(review);
     }
 
-    @GetMapping
-    public List<Review> getAllReviews() {
-        return reviewsService.getAllReviews();
-    }
-
     @PutMapping("/reviews")
     public Review updateReview(@Valid @RequestBody Review review) {
         return reviewsService.updateReview(review);
