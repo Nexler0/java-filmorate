@@ -18,7 +18,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-@Component
 @Repository
 public class DirectorDaoImpl implements DirectorDao {
 
@@ -31,10 +30,10 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Optional<Director> addDirector(Director director) {
-        String insertSql = "INSERT INTO DIRECTORS (name) VALUES (?)";
+//        String insertSql = "INSERT INTO DIRECTORS (name) VALUES (?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(insertSql, new String[] { "ID" });
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO DIRECTORS (name) VALUES (?)", new String[] { "ID" });
             ps.setString(1, director.getName());
             return ps;
         }, keyHolder);
@@ -70,17 +69,17 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public void deleteDirector(Integer id) {
-        String sql = "DELETE FROM DIRECTORS WHERE id = ?";
+//        String sql = "DELETE FROM DIRECTORS WHERE id = ?";
         Object[] args = new Object[] {id};
         log.info("Директор с идентификатором {} удален.", id);
-        jdbcTemplate.update(sql, args);
+        jdbcTemplate.update("DELETE FROM DIRECTORS WHERE id = ?", args);
     }
 
     @Override
     public List<Director> getAllDirector() {
-        String sql = "SELECT * FROM DIRECTORS";
+//        String sql = "SELECT * FROM DIRECTORS";
         log.info("Запрос на получение всех директоров.");
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirectors(rs));
+        return jdbcTemplate.query("SELECT * FROM DIRECTORS", (rs, rowNum) -> makeDirectors(rs));
 
     }
     private Director makeDirectors(ResultSet rs) throws SQLException {
