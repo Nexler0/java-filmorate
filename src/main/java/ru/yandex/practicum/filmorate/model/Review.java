@@ -1,12 +1,26 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotNull;
+
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Review {
-    private int id;
+    private Integer id;
+    @NotNull
     private String content;
-    private boolean isPositive;
-    private int filmId;
-    private  int useful;
+    @NotNull
+    private Boolean isPositive;
+    @NotNull
+    private Integer userId;
+    @NotNull
+    private Integer filmId;
+    private int useful;
 }

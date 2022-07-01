@@ -6,11 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewsService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @Slf4j
-@RequestMapping("/reviews")
+@RequestMapping
 public class ReviewsController {
 
     private final ReviewsService reviewsService;
@@ -19,28 +20,62 @@ public class ReviewsController {
         this.reviewsService = reviewsService;
     }
 
-    @PostMapping
-    public Review addReview(Review review){
+    @PostMapping("/reviews")
+    public Review addReview(@Valid @RequestBody Review review) {
         return reviewsService.addReview(review);
     }
 
-    @PutMapping
-    public Review updateReview(Review review){
+    @GetMapping
+    public List<Review> getAllReviews() {
+        return reviewsService.getAllReviews();
+    }
+
+    @PutMapping("/reviews")
+    public Review updateReview(@Valid @RequestBody Review review) {
         return reviewsService.updateReview(review);
     }
 
-    @DeleteMapping("/{id}")
-    public String deleteReviewById(@PathVariable int id){
+    @DeleteMapping("/reviews/{id}")
+    public String deleteReviewById(@PathVariable int id) {
         return reviewsService.deleteReviewById(id);
     }
 
-    @GetMapping("/{id}")
-    public Review getReviewById(@PathVariable int id){
+    @GetMapping("/reviews/{id}")
+    public Review getReviewById(@PathVariable int id) {
         return reviewsService.getReviewById(id);
     }
 
-    @GetMapping("?filmId={filmId}&count={count}")
-    public List<Review> getListReviewsByIdWithLimit(@PathVariable int filmId, @PathVariable int count){
-        return reviewsService.getListReviewsByIdWithLimit(filmId, count);
+    @GetMapping("/reviews")
+    @ResponseBody
+    public List<Review> getListReviewsWithParams(@RequestParam(required = false, name = "filmId") Integer filmId,
+                                                 @RequestParam(required = false, name = "count") Integer count) {
+
+        if (filmId != null && count != null) {
+            return reviewsService.getListReviewsByFilmIdWithLimit(filmId, count);
+        } else if (filmId != null) {
+            return reviewsService.getReviewByFilmId(filmId);
+        } else {
+            return reviewsService.getAllReviews();
+        }
+    }
+
+    @PutMapping("/reviews/{id}/like/{userId}")
+    public String addUserLikeToReview(@PathVariable int id, @PathVariable int userId) {
+        return reviewsService.addUserLikeToReview(id, userId);
+    }
+
+    @PutMapping("/reviews/{id}/dislike/{userId}")
+    public String addUserDislikeToReview(@PathVariable int id, @PathVariable int userId) {
+        return reviewsService.addUserDislikeToReview(id, userId);
+    }
+
+    @DeleteMapping("/reviews/{id}/like/{userId}")
+    public String deleteUserLikeToReview(@PathVariable int id, @PathVariable int userId) {
+        return reviewsService.deleteUserLikeFromReview(id, userId);
+    }
+
+    @DeleteMapping("/reviews/{id}/dislike/{userId}")
+    public String deleteUserDislikeToReview(@PathVariable int id, @PathVariable int userId) {
+        return reviewsService.deleteUserDislikeFromReview(id, userId);
     }
 }

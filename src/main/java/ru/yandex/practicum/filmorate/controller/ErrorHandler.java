@@ -23,7 +23,8 @@ public class ErrorHandler {
         return new ErrorResponse("Error", String.format("Ошибка “%s”", e.getMessage()));
     }
 
-    @ExceptionHandler({EmptyUsersFriendListException.class, EmptyFilmsListException.class})
+    @ExceptionHandler({EmptyUsersFriendListException.class, EmptyFilmsListException.class,
+            EmptyFilmsListException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse incorrectParameter(final RuntimeException e){
         return new ErrorResponse("Error", String.format("Ошибка “%s”", e.getMessage()));

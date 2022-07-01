@@ -6,15 +6,31 @@ import java.util.List;
 
 public interface ReviewsStorage {
 
-    public Review addReview(Review review);
+    Review addReview(Review review);
 
-    public Review updateReviews(Review review);
+    List<Review> getAllReviews();
 
-    public Review getReviewById(int id);
+    Review updateReviews(Review review);
 
-    public List<Review> getListReviewsByIdWithLimit(int id, int limit);
+    Review getReviewById(int id);
 
-    public String addLike(int reviewId, int userId);
+    List<Review> getListReviewsByFilmIdWithLimit(int id, int limit);
 
-    public String addDislike(int reviewId, int userId);
+    String addLike(int reviewId, int userId);
+
+    String addDislike(int reviewId, int userId);
+
+    String deleteLike(int reviewId, int userId);
+
+    String deleteDislike(int reviewId, int userId);
+
+    String deleteReviewById(int id);
+
+    boolean checkReviewInDb(int id);
+
+    boolean checkReviewInDb(Review review);
+
+    boolean isHaveUsersLikeOrDislike(int userId);
+
+    List<Review> getReviewByFilmId(int filmId);
 }
