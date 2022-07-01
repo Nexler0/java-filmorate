@@ -136,9 +136,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getSortByParamFilms(Integer directorId, String param){
-        if (param.get().equals("year")){
+        if (param.equals("year")){
             return getSortByYearFilms(directorId);
-        } else if (param.get().equals("likes")){
+        } else if (param.equals("likes")){
             return getSortByLikesFilms(directorId);
         }else {
             throw new ValidationException("Параметр в запросе задан не верно!");
@@ -385,21 +385,26 @@ public class FilmDbStorage implements FilmStorage {
      * @return
      */
     private List<Film> getSortByYearFilms(Integer directorId) {
-        String sqlQuery = "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
-                "FROM FILMS " +
-                "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                "WHERE FILMS.FILM_ID IN (" +
-                "        SELECT FILM_ID" +
-                "        FROM FILMS_DIRECTORS " +
-                "        WHERE DIRECTOR_ID = ?" +
-                ") " +
-                "ORDER BY RELEASE_DATE";
+        if (directorDao.containsById(directorId)){
+            String sqlQuery = "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE FILMS.FILM_ID IN (" +
+                    "        SELECT FILM_ID" +
+                    "        FROM FILMS_DIRECTORS " +
+                    "        WHERE DIRECTOR_ID = ?" +
+                    ") " +
+                    "ORDER BY RELEASE_DATE";
 
-        List<Film> filmList = new ArrayList<>();
-        SqlRowSet userRow = jdbcT.queryForRowSet(sqlQuery, directorId);
-        return getFilmsList(filmList, userRow);
+            List<Film> filmList = new ArrayList<>();
+            SqlRowSet userRow = jdbcT.queryForRowSet(sqlQuery, directorId);
+            return getFilmsList(filmList, userRow);
+        }else {
+            throw new NotFoundException("Такого директора нет!");
+        }
+
     }
 
 
@@ -411,20 +416,27 @@ public class FilmDbStorage implements FilmStorage {
      * @return
      */
     private List<Film> getSortByLikesFilms(Integer directorId) {
-        String sqlQuery = "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
-                "FROM FILMS " +
-                "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                "WHERE FILMS.FILM_ID IN (" +
-                "        SELECT FILM_ID" +
-                "        FROM FILMS_DIRECTORS " +
-                "        WHERE DIRECTOR_ID = ?" +
-                ") " +
-                "ORDER BY FILMS.USER_RATE";
-        List<Film> filmList = new ArrayList<>();
-        SqlRowSet userRow = jdbcT.queryForRowSet(sqlQuery, directorId);
-        return getFilmsList(filmList, userRow);
+        //проверить его в БД а потом если есть выводить
+        if (directorDao.containsById(directorId)){
+            String sqlQuery = "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE FILMS.FILM_ID IN (" +
+                    "        SELECT FILM_ID" +
+                    "        FROM FILMS_DIRECTORS " +
+                    "        WHERE DIRECTOR_ID = ?" +
+                    ") " +
+                    "ORDER BY USER_RATE DESC";
+
+            List<Film> filmList = new ArrayList<>();
+            SqlRowSet userRow = jdbcT.queryForRowSet(sqlQuery, directorId);
+            return getFilmsList(filmList, userRow);
+        } else {
+            throw new NotFoundException("Такого директора нет!");
+        }
+
 
 //        public List<Film> getPopularFilms(int count) {
 //            List<Film> filmList = new ArrayList<>();
