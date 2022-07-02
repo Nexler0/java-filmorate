@@ -6,6 +6,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.GetCommonFilmsErrorException;
 import ru.yandex.practicum.filmorate.exceptions.GetRecommendedFilmsErrorException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -513,5 +514,37 @@ public class FilmDbStorage implements FilmStorage {
         } else {
             throw new NotFoundException("Такого директора нет!");
         }
+    }
+
+    private static final String SQL_GET_COMMON_FILMS_ID_LIST =
+            "WITH common_films_id AS (SELECT film_id, COUNT(*)\n" +
+            "                         FROM LIKES\n" +
+            "                         WHERE user_id IN (?, ?)\n" +
+            "                         GROUP BY film_id\n" +
+            "                         HAVING COUNT(*) = 2)\n" +
+            "SELECT film_id, COUNT(*)\n" +
+            "FROM likes\n" +
+            "WHERE film_id IN (SELECT film_id FROM common_films_id)\n" +
+            "GROUP BY film_id\n" +
+            "ORDER BY COUNT(*) DESC";
+
+    //Возвращает список фильмов, отсортированных по популярности.
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        Collection<Film> commonFilms;
+        try {
+           commonFilms = jdbcT.query(SQL_GET_COMMON_FILMS_ID_LIST, this::makeCommonFilm, userId, friendId);
+        } catch (DataAccessException exception) {
+        throw new GetCommonFilmsErrorException(exception.getMessage(), "Ошибка при запросе в БД",
+                "Запрос общих фильмов отсортированных по популярности. userId: " + userId
+                        + "friendId" + friendId);
+    }
+
+        log.trace("Запрос общих фильмов отсортированных по популярности создан. userId: {} " +
+                "friendId: {}", userId, friendId);
+        return commonFilms;
+    }
+
+    private Film makeCommonFilm(ResultSet rs, int rowNum) throws SQLException {
+        return this.getFilmById(rs.getInt("film_id"));
     }
 }
