@@ -8,9 +8,14 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.GetRecommendedFilmsErrorException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.director.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.director.FilmDirector;
+import ru.yandex.practicum.filmorate.storage.DirectorDao;
+import ru.yandex.practicum.filmorate.storage.FilmDirectorsDao;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.ResultSet;
@@ -18,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @Qualifier
@@ -25,6 +31,8 @@ import java.util.List;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcT;
+    private final FilmDirectorsDao filmDirectorsDao;
+    private final DirectorDao directorDao;
     private static int filmId = 0;
 
     private static final String SQL_GET_RECOMMENDED_FILM_ID_LIST =
@@ -50,8 +58,10 @@ public class FilmDbStorage implements FilmStorage {
                     "GROUP BY film_id " +
                     "ORDER BY rate DESC";
 
-    public FilmDbStorage(JdbcTemplate jdbcT) {
+    public FilmDbStorage(JdbcTemplate jdbcT, FilmDirectorsDao filmDirectorsDao, DirectorDao directorDao) {
         this.jdbcT = jdbcT;
+        this.filmDirectorsDao = filmDirectorsDao;
+        this.directorDao = directorDao;
     }
 
     @Override
@@ -151,6 +161,18 @@ public class FilmDbStorage implements FilmStorage {
         return "Like удален";
     }
 
+    @Override
+    public List<Film> getSortByParamFilms(Integer directorId, String param){
+        if (param.equals("year")){
+            return getSortByYearFilms(directorId);
+        } else if (param.equals("likes")){
+            return getSortByLikesFilms(directorId);
+        }else {
+            throw new ValidationException("Параметр в запросе задан не верно!");
+        }
+    }
+
+
     private boolean checkFilmInDb(Film film) {
         SqlRowSet userRow = jdbcT.queryForRowSet(
                 "SELECT * FROM FILMS WHERE NAME = ? AND DESCRIPTION = ? AND RELEASE_DATE = ?",
@@ -189,6 +211,23 @@ public class FilmDbStorage implements FilmStorage {
             while (genreRow.next()) {
                 film.addGenre(new Genre(genreRow.getInt("GENRE_ID")));
             }
+            //Получение списка директоров для фильма
+            SqlRowSet filmRows = jdbcT.queryForRowSet( "select * from FILMS where FILM_ID = ?", id);
+            if (filmRows.next()){
+                if (!filmDirectorsDao.findDirectorByFilms(id).isEmpty()){
+                    List<FilmDirector> listOfDirectors = filmDirectorsDao.findDirectorByFilms(id);
+                    List<Director> directors = new ArrayList<>();
+                    for (FilmDirector filmDirector : listOfDirectors) {
+                        directors.add(Director.builder()
+                                .id(filmDirector.getDirectorsId())
+                                .name(directorDao.getDirById(filmDirector.getDirectorsId()).get().getName())
+                                .build());
+                    }
+                    film.setDirectors(directors);
+                } else {
+                    film.setDirectors(new ArrayList<>());
+                }
+            }
             return film;
         } else {
             throw new NotFoundException("Фильм не найден");
@@ -220,7 +259,20 @@ public class FilmDbStorage implements FilmStorage {
                 );
             }
         }
+        //Добавление директора к фильму если он есть в теле
+        if (film.getDirectors() != null){
+            List<Director> listOfDirectors = film.getDirectors();
+            if (!listOfDirectors.isEmpty()){
+                for (Director director : listOfDirectors) {
+                    if (directorDao.containsById(director.getId())){
+                        filmDirectorsDao.addDirectorToFilm(film.getId(), director.getId());
+                    }else {
+                        throw new NotFoundException("Такого директора в спике нет!");
+                    }
+                }
+            }
 
+        }
         return film;
     }
 
@@ -245,6 +297,8 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDuration(), film.getRate());
         film1.setMpa(film.getMpa());
         film1.setId(film.getId());
+        //Добаление директора к созданному
+        film1.setDirectors(film.getDirectors());
         if (!film.getLikesId().isEmpty()) {
             for (int id : film.getLikesId()) {
                 film1.addUserLike(id);
@@ -255,6 +309,38 @@ public class FilmDbStorage implements FilmStorage {
                 film1.addGenre(genre);
         } else if (film.getGenres() != null && film.getGenres().isEmpty()) {
             film1.createGenreStorage();
+        }
+        //Добаление директора к фильму через Update
+        if (film1.getDirectors() != null){
+            List<Director> listOfDirectors = film1.getDirectors();
+            if (!listOfDirectors.isEmpty()){
+                List<FilmDirector> listDir = filmDirectorsDao.findDirectorByFilms(film1.getId());
+                for (FilmDirector filmDirector : listDir) {
+                    filmDirectorsDao.deleteDirectorFromFilm(film1.getId(), filmDirector.getDirectorsId());
+                }
+                for (Director director : listOfDirectors) {
+                    if (directorDao.containsById(director.getId())){
+                        filmDirectorsDao.addDirectorToFilm(film1.getId(), director.getId());
+                    }else {
+                        throw new NotFoundException("Такого директора в спике нет!");
+                    }
+                }
+                return getFilmById(film1.getId());
+            }else {
+                for (Director director : listOfDirectors) {
+                    if (directorDao.containsById(director.getId())){
+                        filmDirectorsDao.addDirectorToFilm(film1.getId(), director.getId());
+                    }else {
+                        throw new NotFoundException("Такого директора в спике нет!");
+                    }
+                    return getFilmById(film1.getId());
+                }
+            }
+        }else {
+            List<FilmDirector> listDir = filmDirectorsDao.findDirectorByFilms(film1.getId());
+            for (FilmDirector filmDirector : listDir) {
+                filmDirectorsDao.deleteDirectorFromFilm(film1.getId(), filmDirector.getDirectorsId());
+            }
         }
         return film1;
     }
@@ -275,6 +361,24 @@ public class FilmDbStorage implements FilmStorage {
             } catch (NotFoundException info) {
                 log.info("Фильм не имеет жанра");
             }
+            //Получение списка директоров для фильма
+            SqlRowSet filmRows = jdbcT.queryForRowSet( "select * from FILMS where FILM_ID = ?", film.getId());
+            if (filmRows.next()){
+                if (!filmDirectorsDao.findDirectorByFilms(film.getId()).isEmpty()){
+                    List<FilmDirector> listOfDirectors = filmDirectorsDao.findDirectorByFilms(film.getId());
+                    List<Director> directors = new ArrayList<>();
+                    for (FilmDirector filmDirector : listOfDirectors) {
+                        directors.add(Director.builder()
+                                .id(filmDirector.getDirectorsId())
+                                .name(directorDao.getDirById(filmDirector.getDirectorsId()).get().getName())
+                                .build());
+                    }
+                    film.setDirectors(directors);
+                } else {
+                    film.setDirectors(new ArrayList<>());
+                }
+            }
+
             if (!filmList.contains(film)) {
                 filmList.add(film);
             } else {
@@ -325,5 +429,66 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film makeRecommendedFilm(ResultSet rs, int rowNum) throws SQLException {
         return this.getFilmById(rs.getInt("film_id"));
+    }
+
+    /**
+     * Метод получения фильмов директора по годам
+     * Method for obtaining director's films by year
+     *
+     * @param directorId
+     * @return
+     */
+    private List<Film> getSortByYearFilms(Integer directorId) {
+        if (directorDao.containsById(directorId)){
+            String sqlQuery = "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE FILMS.FILM_ID IN (" +
+                    "        SELECT FILM_ID" +
+                    "        FROM FILMS_DIRECTORS " +
+                    "        WHERE DIRECTOR_ID = ?" +
+                    ") " +
+                    "ORDER BY RELEASE_DATE";
+
+            List<Film> filmList = new ArrayList<>();
+            SqlRowSet userRow = jdbcT.queryForRowSet(sqlQuery, directorId);
+            return getFilmsList(filmList, userRow);
+        }else {
+            throw new NotFoundException("Такого директора нет!");
+        }
+
+    }
+
+
+    /**
+     * Метод получения фильмов директора по лайкам
+     * Method for getting director's films by likes
+     *
+     * @param directorId
+     * @return
+     */
+    private List<Film> getSortByLikesFilms(Integer directorId) {
+        //проверить его в БД а потом если есть выводить
+        if (directorDao.containsById(directorId)){
+            String sqlQuery = "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE FILMS.FILM_ID IN (" +
+                    "        SELECT FILM_ID" +
+                    "        FROM FILMS_DIRECTORS " +
+                    "        WHERE DIRECTOR_ID = ?" +
+                    ") " +
+                    "ORDER BY USER_RATE DESC";
+
+            List<Film> filmList = new ArrayList<>();
+            SqlRowSet userRow = jdbcT.queryForRowSet(sqlQuery, directorId);
+            return getFilmsList(filmList, userRow);
+        } else {
+            throw new NotFoundException("Такого директора нет!");
+        }
     }
 }

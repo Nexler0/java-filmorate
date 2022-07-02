@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.director.Director;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -26,6 +27,7 @@ public class Film {
     private List<Integer> likesId;
     private Mpa mpa;
     private List<Genre> genres;
+    private List<Director> directors;
 
 
     public Film(String name, String releaseDate, String description, int duration, int rate) {
@@ -71,6 +73,12 @@ public class Film {
     public void createGenreStorage(){
         if (genres == null) {
             genres = new ArrayList<>();
+        }
+    }
+
+    public void createDirectorsStorage(){
+        if (directors == null) {
+            directors = new ArrayList<>();
         }
     }
 

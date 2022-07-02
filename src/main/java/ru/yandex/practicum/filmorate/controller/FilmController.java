@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -58,4 +59,12 @@ public class FilmController {
     public String deleteTheMovie(@PathVariable int id){
         return filmService.deleteTheMovie(id);
     }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getSortByParamFilms(@PathVariable Integer directorId,
+                                          @RequestParam(name = "sortBy",
+                                                        required = false) String param){
+        return filmService.getSortByParamFilms(directorId, param);
+    }
+
 }

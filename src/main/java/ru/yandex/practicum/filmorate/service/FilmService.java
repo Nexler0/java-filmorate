@@ -52,4 +52,8 @@ public class FilmService {
     public Collection<Film> getRecommendations(int id){
         return filmStorage.getRecommendations(id);
     }
+
+    public List<Film> getSortByParamFilms(Integer directorId, String param){
+        return filmStorage.getSortByParamFilms(directorId, param);
+    }
 }
