@@ -498,7 +498,7 @@ public class FilmDbStorage implements FilmStorage {
             "                         FROM LIKES\n" +
             "                         WHERE user_id IN (?, ?)\n" +
             "                         GROUP BY film_id\n" +
-            "                         HAVING COUNT(*) = 2)\n" +
+            "                         HAVING COUNT(*) > 1)\n" +
             "SELECT film_id, COUNT(*)\n" +
             "FROM likes\n" +
             "WHERE film_id IN (SELECT film_id FROM common_films_id)\n" +
