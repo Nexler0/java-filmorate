@@ -24,6 +24,6 @@ public interface FilmStorage {
 
     String deleteTheMovie(int id);
 
-    List<Film> getFilmsWithRequestedParameters(String query, Set<FilmSearchParam> searchParams);
+    List<Film> getFilmsWithRequestedSearchParameters(String query, Set<FilmSearchParam> searchParams);
 }
 

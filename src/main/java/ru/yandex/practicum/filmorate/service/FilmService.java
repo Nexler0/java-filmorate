@@ -50,9 +50,8 @@ public class FilmService {
         return filmStorage.deleteTheMovie(id);
     }
 
-    public List<Film> getFilmsWithRequestedParameters(String query, String by) {
-        //getSetOfSearchParams(by);
-        return filmStorage.getFilmsWithRequestedParameters(query, getSetOfSearchParams(by));
+    public List<Film> getFilmsWithRequestedSearchParameters(String query, String by) {
+        return filmStorage.getFilmsWithRequestedSearchParameters(query, getSetOfSearchParams(by));
     }
 
     //Проверка параметров поиска

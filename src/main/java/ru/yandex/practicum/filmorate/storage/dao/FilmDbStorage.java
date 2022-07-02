@@ -269,7 +269,7 @@ public class FilmDbStorage implements FilmStorage {
         return filmList;
     }
 
-    public List<Film> getFilmsWithRequestedParameters(String query, Set<FilmSearchParam> searchParams) {
+    public List<Film> getFilmsWithRequestedSearchParameters(String query, Set<FilmSearchParam> searchParams) {
         List<Film> filmList = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
