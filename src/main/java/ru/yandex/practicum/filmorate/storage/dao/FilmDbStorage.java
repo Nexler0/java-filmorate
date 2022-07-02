@@ -278,20 +278,24 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
                         "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
                         "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                        "LEFT JOIN FILMS_DIRECTORS AS FD on FILMS.FILM_ID = FD.FILM_ID" +
-                        "LEFT JOIN DIRECTORS AS D on FD.DIRECTOR_ID = D.DIRECTOR_ID"
+                        "LEFT JOIN FILMS_DIRECTORS AS FD on FILMS.FILM_ID = FD.FILM_ID " +
+                        "LEFT JOIN DIRECTORS AS D on FD.DIRECTOR_ID = D.ID"
         );
-        StringBuilder whereClause = new StringBuilder( "WHERE");
+        StringBuilder whereClause = new StringBuilder(" WHERE");
         String andOp = "";
         for (FilmSearchParam filmSearchParam : searchParams) {
             whereClause.append(andOp);
             whereClause.append(" ");
             whereClause.append(FilmSearchParam.getName(filmSearchParam));
-            whereClause.append(" LIKE '%' || ? || '%'");
-            andOp = " AND ";
+            whereClause.append(" ILIKE '%' || ? || '%'");
+            andOp = " OR ";
+        }
+        Object[] queryList = new Object[searchParams.size()];
+        for (int i = 0; i < searchParams.size(); i++) {
+            queryList[i] = query;
         }
         sql.append(whereClause);
-        SqlRowSet userRow = jdbcT.queryForRowSet(sql.toString(), query);
+        SqlRowSet userRow = jdbcT.queryForRowSet(sql.toString(), queryList);
         return getFilmsList(filmList, userRow);
     }
 }

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 public enum FilmSearchParam {
-    DIRECTOR("directors.name"),
+    DIRECTOR("d.name"),
     TITLE("films.name");
 
     private final String name;
