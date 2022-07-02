@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase
 @Sql({"/recommendationsTest.sql"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class filmorateRecomendstionsTest {
     @Autowired
@@ -34,5 +36,18 @@ public class filmorateRecomendstionsTest {
                                 MockMvcResultMatchers.jsonPath("$[2].id").value(2),
                                 MockMvcResultMatchers.jsonPath("$[3].id").value(5),
                                 MockMvcResultMatchers.jsonPath("$[4].id").value(6));
+    }
+
+    @Test
+    void testGetCommonFilms() throws Exception {
+        mockMvc.perform(get("/films/common")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("userId", "4")
+                .param("friendId", "10"))
+                .andExpectAll(status().isOk(),
+                        MockMvcResultMatchers.jsonPath("$.size()").value(3),
+                        MockMvcResultMatchers.jsonPath("$[0].id").value(3),
+                        MockMvcResultMatchers.jsonPath("$[1].id").value(4),
+                        MockMvcResultMatchers.jsonPath("$[2].id").value(1));
     }
 }

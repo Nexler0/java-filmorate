@@ -33,4 +33,7 @@ public interface FilmStorage {
      * @return
      */
     List<Film> getSortByParamFilms(Integer directorId, String param);
+
+    //Возвращает список фильмов, отсортированных по популярности.
+    Collection<Film> getCommonFilms(int userId, int friendId);
 }
