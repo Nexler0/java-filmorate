@@ -271,7 +271,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Film> getFilmsWithRequestedSearchParameters(String query, Set<FilmSearchParam> searchParams) {
         List<Film> filmList = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(
+        StringBuilder sqlWithoutClause = new StringBuilder(
                 "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
                         "R.RATE_ID AS RATE_ID " +
                         "FROM FILMS " +
@@ -294,8 +294,8 @@ public class FilmDbStorage implements FilmStorage {
         for (int i = 0; i < searchParams.size(); i++) {
             queryList[i] = query;
         }
-        sql.append(whereClause);
-        SqlRowSet userRow = jdbcT.queryForRowSet(sql.toString(), queryList);
+        StringBuilder sqlWithClause = sqlWithoutClause.append(whereClause + " ORDER BY USER_RATE");
+        SqlRowSet userRow = jdbcT.queryForRowSet(sqlWithClause.toString(), queryList);
         return getFilmsList(filmList, userRow);
     }
 }
