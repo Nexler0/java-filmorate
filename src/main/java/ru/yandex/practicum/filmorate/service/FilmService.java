@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FilmService {
@@ -45,5 +48,33 @@ public class FilmService {
 
     public String deleteTheMovie(int id) {
         return filmStorage.deleteTheMovie(id);
+    }
+
+    public List<Film> getFilmsWithRequestedParameters(String query, String by) {
+        //getSetOfSearchParams(by);
+        return filmStorage.getFilmsWithRequestedParameters(query, getSetOfSearchParams(by));
+    }
+
+    //Проверка параметров поиска
+    private Set<FilmSearchParam> getSetOfSearchParams(String by) {
+        Set<FilmSearchParam> searchParams = new HashSet<>();
+        String[] params;
+        if (by.contains(",")) {
+            params = by.split(",");
+        } else {
+            params = new String[]{by};
+        }
+        for (String param : params) {
+            for (FilmSearchParam filmSearchParam : FilmSearchParam.values()) {
+                if (param.equalsIgnoreCase(filmSearchParam.name())) {
+                    searchParams.add(filmSearchParam);
+                }
+            }
+        }
+        if (searchParams.size() > 0 && searchParams.size() == params.length) {
+            return searchParams;
+        } else {
+            throw new ValidationException("Заданные параметры недоступны для поиска!");
+        }
     }
 }

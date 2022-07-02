@@ -9,10 +9,12 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.service.FilmSearchParam;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @Qualifier
@@ -265,5 +267,31 @@ public class FilmDbStorage implements FilmStorage {
         }
         log.info("Нашлось {} в хранилище фильмов", filmList.size());
         return filmList;
+    }
+
+    public List<Film> getFilmsWithRequestedParameters(String query, Set<FilmSearchParam> searchParams) {
+        List<Film> filmList = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                        "R.RATE_ID AS RATE_ID " +
+                        "FROM FILMS " +
+                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                        "LEFT JOIN FILMS_DIRECTORS AS FD on FILMS.FILM_ID = FD.FILM_ID" +
+                        "LEFT JOIN DIRECTORS AS D on FD.DIRECTOR_ID = D.DIRECTOR_ID"
+        );
+        StringBuilder whereClause = new StringBuilder( "WHERE");
+        String andOp = "";
+        for (FilmSearchParam filmSearchParam : searchParams) {
+            whereClause.append(andOp);
+            whereClause.append(" ");
+            whereClause.append(FilmSearchParam.getName(filmSearchParam));
+            whereClause.append(" LIKE '%' || ? || '%'");
+            andOp = " AND ";
+        }
+        sql.append(whereClause);
+        SqlRowSet userRow = jdbcT.queryForRowSet(sql.toString(), query);
+        return getFilmsList(filmList, userRow);
     }
 }

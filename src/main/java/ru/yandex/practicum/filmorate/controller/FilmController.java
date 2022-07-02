@@ -34,6 +34,11 @@ public class FilmController {
         return filmService.getPopularFilms(count);
     }
 
+    @GetMapping("/search")
+    public List<Film> getFilmsWithRequestedParameters(@RequestParam String query, @RequestParam String by) {
+        return filmService.getFilmsWithRequestedParameters(query, by);
+    }
+
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         return filmService.addFilm(film);

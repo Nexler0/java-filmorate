@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmSearchParam;
 
 import java.util.List;
+import java.util.Set;
 
 public interface FilmStorage {
 
@@ -21,4 +23,7 @@ public interface FilmStorage {
     String deleteTheMovieLike(Integer id, Integer userId);
 
     String deleteTheMovie(int id);
+
+    List<Film> getFilmsWithRequestedParameters(String query, Set<FilmSearchParam> searchParams);
 }
+
