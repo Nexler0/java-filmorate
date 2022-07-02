@@ -125,7 +125,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmById(int id) {
         Film film = getFilmFromDbById(id);
         SqlRowSet likesRow = jdbcT.queryForRowSet(
-                "SELECT * FROM LIKES"
+                "SELECT * FROM LIKES WHERE FILM_ID =?", id
         );
         while (likesRow.next()) {
             film.addUserLike(likesRow.getInt("USER_ID"));
@@ -392,8 +392,12 @@ public class FilmDbStorage implements FilmStorage {
                 "SELECT * FROM LIKES"
         );
         while (likesRow.next()) {
-            filmList.stream().filter(film -> film.getId() == (likesRow.getInt("FILM_ID")))
-                    .findAny().get().addUserLike(likesRow.getInt("USER_ID"));
+            try {
+                filmList.stream().filter(film -> film.getId() == (likesRow.getInt("FILM_ID")))
+                        .findAny().get().addUserLike(likesRow.getInt("USER_ID"));
+            } catch (RuntimeException e){
+                log.info("Лайки не найдены для {}", likesRow.getInt("FILM_ID"));
+            }
         }
         log.info("Нашлось {} в хранилище фильмов", filmList.size());
         return filmList;
