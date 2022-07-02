@@ -49,11 +49,16 @@ public class FilmService {
     }
 
     //Получить список рекомендованных фильмов для пользователя по id
-    public Collection<Film> getRecommendations(int id){
+    public Collection<Film> getRecommendations(int id) {
         return filmStorage.getRecommendations(id);
     }
 
-    public List<Film> getSortByParamFilms(Integer directorId, String param){
+    public List<Film> getSortByParamFilms(Integer directorId, String param) {
         return filmStorage.getSortByParamFilms(directorId, param);
+    }
+
+    //Возвращает список фильмов, отсортированных по популярности.
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
     }
 }
