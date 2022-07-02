@@ -40,9 +40,17 @@ public class Film {
     }
 
     public String addUserLike(int userId) {
-        rate++;
+        if (userId > 0 && !likesId.contains(userId)) {
+            likesId.add(userId);
+            rate++;
+            return String.format("Пользователь c id: %s, добавил лайк", id);
+        } else {
+            return "Лайк не добавлен";
+        }
+    }
+
+    public void fillLikesList(int userId){
         likesId.add(userId);
-        return String.format("Пользователь c id: %s, добавил лайк", id);
     }
 
     public String deleteUserLike(int userId) {

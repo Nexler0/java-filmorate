@@ -61,10 +61,10 @@ public class UserDbStorage implements UserStorage {
             );
             if (!userRow.next()) {
                 SqlRowSet count = jdbcT.queryForRowSet(
-                        "SELECT COUNT(USER_ID) AS COUNT FROM USERS"
+                        "SELECT USER_ID AS COUNT FROM USERS ORDER BY COUNT DESC"
                 );
-                if (count.next()) {
-                    userId = count.getInt("COUNT");
+                if (count.first()) {
+                    userId = count.getInt("USER_ID");
                 }
                 log.info("Последний ID:{} ", userId);
                 if (user.getId() == 0 || user.getId() < 0 || user.getId() >= userId) {
@@ -117,7 +117,6 @@ public class UserDbStorage implements UserStorage {
                     );
                 }
             }
-
             log.info("Пользователь c Id:{} обновлен", user.getId());
             return user;
         } else {
@@ -156,17 +155,28 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getAllUserFriendsById(int id) {
         List<User> users = new ArrayList<>();
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT * FROM FRIENDS " +
-                        "WHERE USER_ID = ?", id
-        );
-        while (userRow.next()) {
-            User user = getUserById(userRow.getInt("FRIEND_ID"));
-            if (!users.contains(user)) {
-                users.add(user);
-            }
+        User user = null;
+        try {
+            user = getUserById(id);
+        } catch (NotFoundException e) {
+            log.info("Пользователь с id:{} не существует", id);
         }
-        return users;
+        if (user != null) {
+            if (!user.getAllFriends().isEmpty()) {
+                for (int friendId : user.getAllFriends()) {
+                    try {
+                        users.add(getUserById(friendId));
+                    } catch (NotFoundException e) {
+                        log.info("Пользователь с id:{} не существует", id);
+                    }
+                }
+                return users;
+            } else {
+                return new ArrayList<>();
+            }
+        } else {
+            throw new NotFoundException(String.format("Пользователь с id:%s не существует", id));
+        }
     }
 
     @Override
