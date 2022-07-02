@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS USERS
     EMAIL    VARCHAR not null,
     NAME     VARCHAR,
     LOGIN    VARCHAR,
-    BIRTHDAY DATE
+    BIRTHDAY DATE,
+    CONSTRAINT user_pk PRIMARY KEY (user_id) -- pk
 );
 COMMENT ON TABLE USERS IS 'Хранилище пользователей';
 
@@ -62,7 +63,10 @@ CREATE TABLE IF NOT EXISTS
     LIKES
 (
     FILM_ID INTEGER,
-    USER_ID INTEGER
+    USER_ID INTEGER,
+    CONSTRAINT fk_film_id FOREIGN KEY (film_id) REFERENCES films (film_id) ON DELETE CASCADE , --fk
+    CONSTRAINT fk_user_liked_id FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE, --fk
+    CONSTRAINT pk_fl PRIMARY KEY (film_id, user_id) --pk
 );
 
 CREATE TABLE IF NOT EXISTS REVIEWS
