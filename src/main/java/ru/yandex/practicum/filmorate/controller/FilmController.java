@@ -30,9 +30,20 @@ public class FilmController {
         return filmService.getFilmById(id);
     }
 
+    //GET /films/popular?count={limit}&genreId={genreId}&year={year}
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(name = "count", defaultValue = "10") Integer count,
+                                      @RequestParam(name = "genreId", required = false) Integer genreId,
+                                      @RequestParam (name = "year", required = false) Integer year) {
+        if (genreId == null && year == null){
+            return filmService.getPopularFilms(count);
+        }else if (genreId == null) {
+            return filmService.getPopularFilmsByYear(count, year);
+        } else if (year == null){
+            return filmService.getPopularFilmsByGenre(count, genreId);
+        }else {
+            return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
+        }
     }
 
     @GetMapping("/search")

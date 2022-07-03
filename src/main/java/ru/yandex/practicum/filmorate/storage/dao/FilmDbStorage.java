@@ -581,4 +581,53 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet userRow = jdbcT.queryForRowSet(sqlWithClause.toString(), queryList);
         return getFilmsList(filmList, userRow);
     }
+
+    @Override
+    public List<Film> getPopularFilmsByYear(Integer count, Integer year) {
+        List<Film> filmList = new ArrayList<>();
+        SqlRowSet userRow = jdbcT.queryForRowSet(
+                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                        "R.RATE_ID AS RATE_ID " +
+                        "FROM FILMS " +
+                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                        "WHERE EXTRACT(YEAR FROM RELEASE_DATE) = ? " +
+                        "ORDER BY USER_RATE DESC LIMIT ? ", year, count
+        );
+        return getFilmsList(filmList, userRow);
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
+        List<Film> filmList = new ArrayList<>();
+        SqlRowSet userRow = jdbcT.queryForRowSet(
+                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                        "R.RATE_ID AS RATE_ID " +
+                        "FROM FILMS " +
+                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                        "WHERE G2.GENRE_ID = ? " +
+                        "ORDER BY USER_RATE DESC LIMIT ? ", genreId, count
+        );
+        return getFilmsList(filmList, userRow);
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
+        List<Film> filmList = new ArrayList<>();
+        SqlRowSet userRow = jdbcT.queryForRowSet(
+                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                        "R.RATE_ID AS RATE_ID " +
+                        "FROM FILMS " +
+                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                        "WHERE EXTRACT(YEAR FROM RELEASE_DATE) = ? " +
+                        "AND G2.GENRE_ID = ? " +
+                        "ORDER BY USER_RATE DESC LIMIT ? ", year, genreId, count
+        );
+        return getFilmsList(filmList, userRow);
+    }
 }

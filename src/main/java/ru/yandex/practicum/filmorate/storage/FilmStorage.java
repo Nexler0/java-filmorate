@@ -40,5 +40,12 @@ public interface FilmStorage {
     Collection<Film> getCommonFilms(int userId, int friendId);
 
     List<Film> getFilmsWithRequestedSearchParameters(String query, Set<FilmSearchParam> searchParams);
+
+    //Возвращает список фильмов по году
+    List<Film> getPopularFilmsByYear(Integer count, Integer year);
+    //Возвращает список фильмов по жанру
+    List<Film> getPopularFilmsByGenre(Integer count, Integer genreId);
+    //Возвращает список фильмов по году и по жанру
+    List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year);
 }
 

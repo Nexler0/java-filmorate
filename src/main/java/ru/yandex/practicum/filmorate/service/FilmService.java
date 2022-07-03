@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class FilmService {
@@ -90,5 +88,25 @@ public class FilmService {
         } else {
             throw new ValidationException("Заданные параметры недоступны для поиска!");
         }
+    }
+
+    public List<Film> getPopularFilmsByYear(Integer count, Integer year){
+        return filmStorage.getPopularFilmsByYear(count, year);
+    }
+
+    public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId){
+        if (genreId < 1 || genreId > 6){
+            throw new NotFoundException("Такого жанра не существует!");
+        }else {
+            return filmStorage.getPopularFilmsByGenre(count, genreId);
+        }
+    }
+    public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year){
+        if (genreId < 1 || genreId > 6){
+            throw new NotFoundException("Такого жанра не существует!");
+        }else {
+            return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
+        }
+
     }
 }
