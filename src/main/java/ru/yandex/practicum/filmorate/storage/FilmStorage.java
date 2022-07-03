@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmSearchParam;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface FilmStorage {
 
@@ -36,4 +38,7 @@ public interface FilmStorage {
 
     //Возвращает список фильмов, отсортированных по популярности.
     Collection<Film> getCommonFilms(int userId, int friendId);
+
+    List<Film> getFilmsWithRequestedSearchParameters(String query, Set<FilmSearchParam> searchParams);
 }
+

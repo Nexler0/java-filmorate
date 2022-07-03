@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.director.FilmDirector;
 import ru.yandex.practicum.filmorate.storage.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.FilmDirectorsDao;
+import ru.yandex.practicum.filmorate.service.FilmSearchParam;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -25,6 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @Qualifier
@@ -258,6 +260,8 @@ public class FilmDbStorage implements FilmStorage {
         jdbcT.update("DELETE FROM FILMS_GENRE WHERE FILM_ID = ?", film.getId());
         jdbcT.update("DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?", film.getId());
         jdbcT.update("DELETE FROM FILMS WHERE FILM_ID = ?", film.getId());
+        jdbcT.update("DELETE FROM FILMS_GENRE WHERE FILM_ID = ?", film.getId());
+        jdbcT.update("DELETE FROM LIKES WHERE FILM_ID = ?", film.getId());
         jdbcT.update(
                 "INSERT INTO FILMS (FILM_ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATE, USER_RATE)" +
                         "VALUES (?, ?, ?, ?, ?, ?, ?)", film.getId(), film.getName(), film.getDescription(),
@@ -546,5 +550,35 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film makeCommonFilm(ResultSet rs, int rowNum) throws SQLException {
         return this.getFilmById(rs.getInt("film_id"));
+    }
+
+    public List<Film> getFilmsWithRequestedSearchParameters(String query, Set<FilmSearchParam> searchParams) {
+        List<Film> filmList = new ArrayList<>();
+        StringBuilder sqlWithoutClause = new StringBuilder(
+                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                        "R.RATE_ID AS RATE_ID " +
+                        "FROM FILMS " +
+                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                        "LEFT JOIN FILMS_DIRECTORS AS FD on FILMS.FILM_ID = FD.FILM_ID " +
+                        "LEFT JOIN DIRECTORS AS D on FD.DIRECTOR_ID = D.ID"
+        );
+        StringBuilder whereClause = new StringBuilder(" WHERE");
+        String andOp = "";
+        for (FilmSearchParam filmSearchParam : searchParams) {
+            whereClause.append(andOp);
+            whereClause.append(" ");
+            whereClause.append(FilmSearchParam.getName(filmSearchParam));
+            whereClause.append(" ILIKE '%' || ? || '%'");
+            andOp = " OR ";
+        }
+        Object[] queryList = new Object[searchParams.size()];
+        for (int i = 0; i < searchParams.size(); i++) {
+            queryList[i] = query;
+        }
+        StringBuilder sqlWithClause = sqlWithoutClause.append(whereClause + " ORDER BY USER_RATE");
+        SqlRowSet userRow = jdbcT.queryForRowSet(sqlWithClause.toString(), queryList);
+        return getFilmsList(filmList, userRow);
     }
 }
