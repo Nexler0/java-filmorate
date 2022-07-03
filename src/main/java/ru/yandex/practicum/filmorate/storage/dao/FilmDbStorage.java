@@ -378,12 +378,20 @@ public class FilmDbStorage implements FilmStorage {
                     userRow.getInt("USER_RATE"));
             film.setId(userRow.getInt("FILM_ID"));
             film.setMpa(new Mpa(userRow.getInt("RATE_ID")));
-            Genre genre = null;
-            try {
-                genre = new Genre(userRow.getInt("GENRE_ID"));
-                film.addGenre(genre);
-            } catch (NotFoundException info) {
-                log.info("Фильм не имеет жанра");
+            //Было
+//            Genre genre = null;
+//            try {
+//                genre = new Genre(userRow.getInt("GENRE_ID"));
+//                film.addGenre(genre);
+//            } catch (NotFoundException info) {
+//                log.info("Фильм не имеет жанра");
+//            }
+            //Стало
+            SqlRowSet genreRow = jdbcT.queryForRowSet(
+                    "SELECT * FROM FILMS_GENRE WHERE FILM_ID = ?", film.getId()
+            );
+            while (genreRow.next()) {
+                film.addGenre(new Genre(genreRow.getInt("GENRE_ID")));
             }
             //Получение списка директоров для фильма
             SqlRowSet filmRows = jdbcT.queryForRowSet("select * from FILMS where FILM_ID = ?", film.getId());
@@ -407,8 +415,14 @@ public class FilmDbStorage implements FilmStorage {
                 filmList.add(film);
             } else {
                 Film updateFilm = filmList.stream().filter(film1 -> film1.equals(film)).findAny().get();
-                if (updateFilm.getGenres().contains(genre)) {
-                    updateFilm.addGenre(genre);
+//                Не знаю что это было, но исправил на проверку списка!
+//                if (updateFilm.getGenres().contains(genre)) {
+//                    updateFilm.addGenre(genre);
+//                }
+                for (Genre genre : film.getGenres()) {
+                    if (updateFilm.getGenres().contains(genre)) {
+                        updateFilm.addGenre(genre);
+                    }
                 }
             }
         }
