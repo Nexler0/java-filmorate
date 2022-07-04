@@ -39,6 +39,13 @@ public class Film {
         likesId = new ArrayList<>();
     }
 
+    public int getRate() {
+        return likesId.size();
+    }
+
+    public void setRate(int rate) {
+    }
+
     public String addUserLike(int userId) {
         if (userId > 0 && !likesId.contains(userId)) {
             likesId.add(userId);
