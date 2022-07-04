@@ -28,9 +28,9 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     public void addDirectorToFilm(Integer filmId, Integer directorId) {
         String insertQuery = "insert into FILMS_DIRECTORS (FILM_ID, DIRECTOR_ID) values (?, ?)";
         int status = jdbcTemplate.update(insertQuery, filmId, directorId);
-        if(status != 0){
+        if (status != 0) {
             log.info("Добавлен директор к фильму: ID {}", filmId);
-        }else{
+        } else {
             log.info("Не добавлен директор к фильму: ID {}", filmId);
         }
     }
@@ -38,7 +38,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     @Override
     public void deleteDirectorFromFilm(Integer filmId, Integer directorId) {
         String sql = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ? AND DIRECTOR_ID = ?";
-        Object[] args = new Object[] {filmId, directorId};
+        Object[] args = new Object[]{filmId, directorId};
         jdbcTemplate.update(sql, args);
         log.info("Удален директор у фильма идентификатором {} {}", filmId, directorId);
     }
@@ -46,7 +46,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     @Override
     public boolean containsDirectorInFilmById(Integer filmId, Integer directorId) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from FILMS_DIRECTORS where FILM_ID = ? AND DIRECTOR_ID = ?", filmId, directorId);
-        if (userRows.next()){
+        if (userRows.next()) {
             return true;
         } else {
             return false;
@@ -59,6 +59,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
         log.info("Запрос на получение всех директоров у фильма.");
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmDirectors(rs));
     }
+
     private FilmDirector makeFilmDirectors(ResultSet rs) throws SQLException {
         return FilmDirector.builder()
                 .filmId(rs.getInt("FILM_ID"))
@@ -72,6 +73,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
         log.info("Запрос на получение всех фильмов у директора.");
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirectorFilms(rs));
     }
+
     private FilmDirector makeDirectorFilms(ResultSet rs) throws SQLException {
         return FilmDirector.builder()
                 .filmId(rs.getInt("FILM_ID"))

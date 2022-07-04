@@ -21,6 +21,7 @@ public interface FilmDirectorsDao {
     /**
      * Удалить директора у фильма из DB
      * Delete director from film in DB
+     *
      * @param filmId
      * @param directorId
      */
@@ -29,6 +30,7 @@ public interface FilmDirectorsDao {
     /**
      * Проверка наличия директора у фильма
      * Contains director in Film in DB
+     *
      * @param filmId
      * @param directorId
      * @return
@@ -38,6 +40,7 @@ public interface FilmDirectorsDao {
     /**
      * Найти директоров по ид фильма в БД
      * Find directors Film by ID in DB
+     *
      * @param filmId
      * @return
      */
@@ -46,6 +49,7 @@ public interface FilmDirectorsDao {
     /**
      * Найти все фильмы по ID диретора
      * Find all films by id of directors
+     *
      * @param directorId
      * @return
      */

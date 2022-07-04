@@ -13,7 +13,7 @@ public class Mpa {
 
     public Mpa(int id) {
         this.id = id;
-        switch (id){
+        switch (id) {
             case 1:
                 name = "G";
                 break;

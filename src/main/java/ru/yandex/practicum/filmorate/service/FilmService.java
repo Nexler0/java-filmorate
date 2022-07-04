@@ -90,21 +90,22 @@ public class FilmService {
         }
     }
 
-    public List<Film> getPopularFilmsByYear(Integer count, Integer year){
+    public List<Film> getPopularFilmsByYear(Integer count, Integer year) {
         return filmStorage.getPopularFilmsByYear(count, year);
     }
 
-    public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId){
-        if (genreId < 1 || genreId > 6){
+    public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
+        if (genreId < 1 || genreId > 6) {
             throw new NotFoundException("Такого жанра не существует!");
-        }else {
+        } else {
             return filmStorage.getPopularFilmsByGenre(count, genreId);
         }
     }
-    public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year){
-        if (genreId < 1 || genreId > 6){
+
+    public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
+        if (genreId < 1 || genreId > 6) {
             throw new NotFoundException("Такого жанра не существует!");
-        }else {
+        } else {
             return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
         }
 

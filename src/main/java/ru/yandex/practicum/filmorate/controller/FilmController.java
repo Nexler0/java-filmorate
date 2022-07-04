@@ -34,14 +34,14 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(name = "count", defaultValue = "10") Integer count,
                                       @RequestParam(name = "genreId", required = false) Integer genreId,
-                                      @RequestParam (name = "year", required = false) Integer year) {
-        if (genreId == null && year == null){
+                                      @RequestParam(name = "year", required = false) Integer year) {
+        if (genreId == null && year == null) {
             return filmService.getPopularFilms(count);
-        }else if (genreId == null) {
+        } else if (genreId == null) {
             return filmService.getPopularFilmsByYear(count, year);
-        } else if (year == null){
+        } else if (year == null) {
             return filmService.getPopularFilmsByGenre(count, genreId);
-        }else {
+        } else {
             return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
         }
     }

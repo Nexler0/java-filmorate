@@ -49,7 +49,7 @@ public class Film {
         }
     }
 
-    public void fillLikesList(int userId){
+    public void fillLikesList(int userId) {
         likesId.add(userId);
     }
 
@@ -78,13 +78,13 @@ public class Film {
         });
     }
 
-    public void createGenreStorage(){
+    public void createGenreStorage() {
         if (genres == null) {
             genres = new ArrayList<>();
         }
     }
 
-    public void createDirectorsStorage(){
+    public void createDirectorsStorage() {
         if (directors == null) {
             directors = new ArrayList<>();
         }

@@ -16,16 +16,16 @@ import java.util.List;
 public class MpaController {
 
     @GetMapping
-    public List<Mpa> getAllMpa(){
+    public List<Mpa> getAllMpa() {
         List<Mpa> rates = new ArrayList<>();
-        for (int i = 1; i <= 5; i++){
+        for (int i = 1; i <= 5; i++) {
             rates.add(new Mpa(i));
         }
         return rates;
     }
 
     @GetMapping("/{id}")
-    public Mpa getMpaById(@PathVariable int id){
+    public Mpa getMpaById(@PathVariable int id) {
         return new Mpa(id);
     }
 }

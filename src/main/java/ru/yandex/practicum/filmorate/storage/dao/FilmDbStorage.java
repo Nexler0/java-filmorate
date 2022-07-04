@@ -201,12 +201,10 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet userRow = jdbcT.queryForRowSet(
                 "SELECT *, G2.GENRE_ID AS GENRE_ID, G2.NAME AS GENRE_NAME, " +
                         "R.RATE_ID AS RATE_ID, R.NAME AS RATE_NAME " +
-//                        ",L.USER_ID AS USER_LIKE " +
                         "FROM FILMS " +
                         "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
                         "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
                         "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-//                        "LEFT JOIN LIKES AS L on FG.FILM_ID = L.FILM_ID " +
                         "WHERE FILMS.FILM_ID = ?", id
         );
         if (userRow.next()) {
@@ -378,15 +376,6 @@ public class FilmDbStorage implements FilmStorage {
                     userRow.getInt("USER_RATE"));
             film.setId(userRow.getInt("FILM_ID"));
             film.setMpa(new Mpa(userRow.getInt("RATE_ID")));
-            //Было
-//            Genre genre = null;
-//            try {
-//                genre = new Genre(userRow.getInt("GENRE_ID"));
-//                film.addGenre(genre);
-//            } catch (NotFoundException info) {
-//                log.info("Фильм не имеет жанра");
-//            }
-            //Стало
             SqlRowSet genreRow = jdbcT.queryForRowSet(
                     "SELECT * FROM FILMS_GENRE WHERE FILM_ID = ?", film.getId()
             );
@@ -415,10 +404,6 @@ public class FilmDbStorage implements FilmStorage {
                 filmList.add(film);
             } else {
                 Film updateFilm = filmList.stream().filter(film1 -> film1.equals(film)).findAny().get();
-//                Не знаю что это было, но исправил на проверку списка!
-//                if (updateFilm.getGenres().contains(genre)) {
-//                    updateFilm.addGenre(genre);
-//                }
                 for (Genre genre : film.getGenres()) {
                     if (updateFilm.getGenres().contains(genre)) {
                         updateFilm.addGenre(genre);
@@ -503,7 +488,6 @@ public class FilmDbStorage implements FilmStorage {
 
     }
 
-
     /**
      * Метод получения фильмов директора по лайкам
      * Method for getting director's films by likes
@@ -536,26 +520,26 @@ public class FilmDbStorage implements FilmStorage {
 
     private static final String SQL_GET_COMMON_FILMS_ID_LIST =
             "WITH common_films_id AS (SELECT film_id, COUNT(*)\n" +
-            "                         FROM LIKES\n" +
-            "                         WHERE user_id IN (?, ?)\n" +
-            "                         GROUP BY film_id\n" +
-            "                         HAVING COUNT(*) = 2)\n" +
-            "SELECT film_id, COUNT(*)\n" +
-            "FROM likes\n" +
-            "WHERE film_id IN (SELECT film_id FROM common_films_id)\n" +
-            "GROUP BY film_id\n" +
-            "ORDER BY COUNT(*) DESC";
+                    "                         FROM LIKES\n" +
+                    "                         WHERE user_id IN (?, ?)\n" +
+                    "                         GROUP BY film_id\n" +
+                    "                         HAVING COUNT(*) = 2)\n" +
+                    "SELECT film_id, COUNT(*)\n" +
+                    "FROM likes\n" +
+                    "WHERE film_id IN (SELECT film_id FROM common_films_id)\n" +
+                    "GROUP BY film_id\n" +
+                    "ORDER BY COUNT(*) DESC";
 
     //Возвращает список фильмов, отсортированных по популярности.
     public Collection<Film> getCommonFilms(int userId, int friendId) {
         Collection<Film> commonFilms;
         try {
-           commonFilms = jdbcT.query(SQL_GET_COMMON_FILMS_ID_LIST, this::makeCommonFilm, userId, friendId);
+            commonFilms = jdbcT.query(SQL_GET_COMMON_FILMS_ID_LIST, this::makeCommonFilm, userId, friendId);
         } catch (DataAccessException exception) {
-        throw new GetCommonFilmsErrorException(exception.getMessage(), "Ошибка при запросе в БД",
-                "Запрос общих фильмов отсортированных по популярности. userId: " + userId
-                        + "friendId" + friendId);
-    }
+            throw new GetCommonFilmsErrorException(exception.getMessage(), "Ошибка при запросе в БД",
+                    "Запрос общих фильмов отсортированных по популярности. userId: " + userId
+                            + "friendId" + friendId);
+        }
 
         log.trace("Запрос общих фильмов отсортированных по популярности создан. userId: {} " +
                 "friendId: {}", userId, friendId);
