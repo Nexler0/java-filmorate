@@ -23,19 +23,17 @@ public class Film {
     @NotBlank
     private final String releaseDate;
     private final int duration;
-    private int rate;
     private List<Integer> likesId;
     private Mpa mpa;
     private List<Genre> genres;
     private List<Director> directors;
 
 
-    public Film(String name, String releaseDate, String description, int duration, int rate) {
+    public Film(String name, String releaseDate, String description, int duration) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.rate = rate;
         likesId = new ArrayList<>();
     }
 
@@ -43,13 +41,9 @@ public class Film {
         return likesId.size();
     }
 
-    public void setRate(int rate) {
-    }
-
     public String addUserLike(int userId) {
         if (userId > 0 && !likesId.contains(userId)) {
             likesId.add(userId);
-            rate++;
             return String.format("Пользователь c id: %s, добавил лайк", id);
         } else {
             return "Лайк не добавлен";
@@ -62,7 +56,6 @@ public class Film {
 
     public String deleteUserLike(int userId) {
         if (likesId.contains(userId)) {
-            rate--;
             likesId.removeIf(id -> id == userId);
             return String.format("Пользователь c id: %s, удалил лайк", id);
         }

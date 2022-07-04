@@ -211,8 +211,7 @@ public class FilmDbStorage implements FilmStorage {
             film = new Film(userRow.getString("NAME"),
                     userRow.getString("RELEASE_DATE"),
                     userRow.getString("DESCRIPTION"),
-                    userRow.getInt("DURATION"),
-                    userRow.getInt("USER_RATE"));
+                    userRow.getInt("DURATION"));
             film.setId(userRow.getInt("FILM_ID"));
             film.setMpa(new Mpa(userRow.getInt("RATE_ID")));
         }
@@ -316,7 +315,7 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
         Film film1 = new Film(film.getName(), film.getReleaseDate(), film.getDescription(),
-                film.getDuration(), film.getRate());
+                film.getDuration());
         film1.setMpa(film.getMpa());
         film1.setId(film.getId());
         //Добаление директора к созданному
@@ -372,8 +371,7 @@ public class FilmDbStorage implements FilmStorage {
             Film film = new Film(userRow.getString("NAME"),
                     userRow.getString("RELEASE_DATE"),
                     userRow.getString("DESCRIPTION"),
-                    userRow.getInt("DURATION"),
-                    userRow.getInt("USER_RATE"));
+                    userRow.getInt("DURATION"));
             film.setId(userRow.getInt("FILM_ID"));
             film.setMpa(new Mpa(userRow.getInt("RATE_ID")));
             SqlRowSet genreRow = jdbcT.queryForRowSet(
