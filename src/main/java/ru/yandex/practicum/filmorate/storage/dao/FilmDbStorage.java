@@ -403,6 +403,12 @@ public class FilmDbStorage implements FilmStorage {
                     }
                 }
                 return getFilmById(film1.getId());
+            } else {
+                List<FilmDirector> listDir = filmDirectorsDao.findDirectorByFilms(film1.getId());
+                for (FilmDirector filmDirector : listDir) {
+                    filmDirectorsDao.deleteDirectorFromFilm(film1.getId(), filmDirector.getDirectorsId());
+                }
+                return getFilmById(film1.getId());
             }
         } else {
             List<FilmDirector> listDir = filmDirectorsDao.findDirectorByFilms(film1.getId());
