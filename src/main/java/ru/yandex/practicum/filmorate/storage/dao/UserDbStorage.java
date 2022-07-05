@@ -186,7 +186,7 @@ public class UserDbStorage implements UserStorage {
         );
         if (userRow.next()) {
             jdbcT.update(
-                    "DELETE FROM FRIENDS WHERE USER_ID = ?", id
+                    "DELETE FROM FRIENDS WHERE USER_ID = ? OR FRIEND_ID = ?", id, id
             );
             jdbcT.update(
                     "DELETE FROM USERS WHERE USER_ID = ?", id

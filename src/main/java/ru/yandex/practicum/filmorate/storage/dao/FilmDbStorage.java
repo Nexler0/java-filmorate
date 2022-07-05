@@ -87,10 +87,10 @@ public class FilmDbStorage implements FilmStorage {
     public Film addFilm(Film film) {
         if (!checkFilmInDb(film)) {
             SqlRowSet userRow = jdbcT.queryForRowSet(
-                    "SELECT COUNT(FILM_ID) AS SUM FROM FILMS"
+                    "SELECT FILM_ID AS COUNT FROM FILMS ORDER BY FILM_ID DESC"
             );
-            if (userRow.next()) {
-                filmId = userRow.getInt("SUM");
+            if (userRow.first()) {
+                filmId = userRow.getInt("COUNT");
             }
             log.info("Последний ID:{} ", filmId);
             if (film.getId() == 0 || film.getId() < 0 || film.getId() >= filmId) {
@@ -197,7 +197,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film getFilmFromDbById(int id) {
         Film film = null;
-        Film oldFilm = null;
+
         SqlRowSet userRow = jdbcT.queryForRowSet(
                 "SELECT *, G2.GENRE_ID AS GENRE_ID, G2.NAME AS GENRE_NAME, " +
                         "R.RATE_ID AS RATE_ID, R.NAME AS RATE_NAME " +
