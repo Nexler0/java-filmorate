@@ -23,6 +23,35 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcT;
     private static int userId = 0;
 
+    private static final String GET_ALL_USERS_SQL =
+            "SELECT *, f.FRIEND_ID AS FRIEND_ID FROM USERS " +
+            "LEFT JOIN FRIENDS AS F on USERS.USER_ID = F.USER_ID";
+    private static final String GET_USER_IN_DB_BY_EMAIL_LOGIN_BIRTHDAY_SQL =
+            "SELECT * FROM USERS WHERE EMAIL = ? AND LOGIN = ? AND BIRTHDAY = ?";
+    private static final String GET_LAST_USER_ID_SQL =
+            "SELECT USER_ID AS COUNT FROM USERS ORDER BY COUNT DESC";
+    private static final String INSERT_USER_SQL =
+            "INSERT INTO USERS (USER_ID, EMAIL, NAME, LOGIN, BIRTHDAY) VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_USERS_FRIENDS_STATUS_UNCONFIRMED_SQL =
+            "INSERT INTO FRIENDS  (USER_ID, FRIEND_ID, FRIENDSHIP_STATUS) VALUES (?, ?, 2)";
+    private static final String INSERT_USERS_FRIENDS_STATUS_CONFIRMED_SQL =
+            "INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIENDSHIP_STATUS) VALUES (?, ?, 1)";
+    private static final String DELETE_FRIENDS_BY_USER_ID_SQL = "DELETE FROM FRIENDS WHERE USER_ID = ?";
+    private static final String UPDATE_USER_BY_ID_SQL =
+            "UPDATE USERS SET EMAIL = ?, NAME = ?, LOGIN = ?, BIRTHDAY = ? WHERE USER_ID = ?";
+    private static final String DELETE_FRIENDS_BY_USER_AND_FRIEND_ID_SQL =
+            "DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?";
+    private static final String GET_USER_BY_ID_SQL =
+            "SELECT * FROM USERS WHERE USER_ID = ?";
+    private static final String GET_FRIEND_BY_USER_ID_SQL =
+            "SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?";
+    private static final String DELETE_USER_BY_ID_SQL =
+            "DELETE FROM USERS WHERE USER_ID = ?";
+    private static final String GET_FRIENDSHIP_STATUS_BY_USER_AND_FRIEND_ID_SQL =
+            "SELECT FS.NAME AS STATUS FROM FRIENDS " +
+                    "JOIN FRIENDSHIP_STATUS FS on FS.STATUS_ID = FRIENDS.FRIENDSHIP_STATUS " +
+                    "WHERE USER_ID = ? AND FRIEND_ID =? ";
+
     public UserDbStorage(JdbcTemplate jdbcT) {
         this.jdbcT = jdbcT;
     }
@@ -30,10 +59,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT *, f.FRIEND_ID AS FRIEND_ID FROM USERS " +
-                        "LEFT JOIN FRIENDS AS F on USERS.USER_ID = F.USER_ID"
-        );
+        SqlRowSet userRow = jdbcT.queryForRowSet(GET_ALL_USERS_SQL);
         while (userRow.next()) {
             User user = new User(
                     userRow.getString("EMAIL"),
@@ -56,13 +82,11 @@ public class UserDbStorage implements UserStorage {
         if (LocalDate.parse(user.getBirthday(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 .isBefore(LocalDate.now())) {
             SqlRowSet userRow = jdbcT.queryForRowSet(
-                    "SELECT * FROM USERS WHERE EMAIL = ? AND LOGIN = ? AND BIRTHDAY = ?",
+                    GET_USER_IN_DB_BY_EMAIL_LOGIN_BIRTHDAY_SQL,
                     user.getEmail(), user.getLogin(), user.getBirthday()
             );
             if (!userRow.next()) {
-                SqlRowSet count = jdbcT.queryForRowSet(
-                        "SELECT USER_ID AS COUNT FROM USERS ORDER BY COUNT DESC"
-                );
+                SqlRowSet count = jdbcT.queryForRowSet(GET_LAST_USER_ID_SQL);
                 if (count.first()) {
                     userId = count.getInt("USER_ID");
                 }
@@ -71,13 +95,10 @@ public class UserDbStorage implements UserStorage {
                     userId++;
                     user.setId(userId);
                 }
-                jdbcT.update(
-                        "INSERT INTO USERS (USER_ID, EMAIL, NAME, LOGIN, BIRTHDAY) VALUES (?, ?, ?, ?, ?)",
-                        user.getId(), user.getEmail(), user.getName(), user.getLogin(), user.getBirthday()
-                );
+                jdbcT.update(INSERT_USER_SQL, user.getId(), user.getEmail(), user.getName(),
+                        user.getLogin(), user.getBirthday());
                 for (int friendId : user.getAllFriends()) {
-                    jdbcT.update("INSERT INTO FRIENDS  (USER_ID, FRIEND_ID, FRIENDSHIP_STATUS)" +
-                            " VALUES (?, ?, 2)", user.getId(), friendId);
+                    jdbcT.update(INSERT_USERS_FRIENDS_STATUS_UNCONFIRMED_SQL, user.getId(), friendId);
                 }
             }
             return user;
@@ -92,29 +113,19 @@ public class UserDbStorage implements UserStorage {
         User oldUser = getUserById(user.getId());
         if (oldUser != null) {
             if (!user.getAllFriends().isEmpty()) {
-                jdbcT.update(
-                        "DELETE FROM FRIENDS WHERE USER_ID = ? ",
-                        user.getId()
-                );
+                jdbcT.update(DELETE_FRIENDS_BY_USER_ID_SQL, user.getId());
             }
-            jdbcT.update(
-                    "UPDATE USERS SET EMAIL = ?, NAME = ?, LOGIN = ?, BIRTHDAY = ? WHERE USER_ID = ?",
-                    user.getEmail(), user.getName(), user.getLogin(), user.getBirthday(), user.getId()
-            );
+            jdbcT.update(UPDATE_USER_BY_ID_SQL, user.getEmail(), user.getName(), user.getLogin(),
+                    user.getBirthday(), user.getId());
             for (int friendId : user.getFriendsList()) {
                 User friend = getUserById(friendId);
                 if (friend.getAllFriends().contains(user.getId())) {
-                    String deleteFromFriends = "DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?";
-                    jdbcT.update(deleteFromFriends, user.getId(), friendId);
-                    jdbcT.update(deleteFromFriends, friendId, user.getId());
-                    String insertFriends = "INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIENDSHIP_STATUS) VALUES (?,?,1)";
-                    jdbcT.update(insertFriends, user.getId(), friendId);
-                    jdbcT.update(insertFriends, friendId, user.getId());
+                    jdbcT.update(DELETE_FRIENDS_BY_USER_AND_FRIEND_ID_SQL, user.getId(), friendId);
+                    jdbcT.update(DELETE_FRIENDS_BY_USER_AND_FRIEND_ID_SQL, friendId, user.getId());
+                    jdbcT.update(INSERT_USERS_FRIENDS_STATUS_CONFIRMED_SQL, user.getId(), friendId);
+                    jdbcT.update(INSERT_USERS_FRIENDS_STATUS_CONFIRMED_SQL, friendId, user.getId());
                 } else {
-                    jdbcT.update(
-                            "INSERT INTO FRIENDS (USER_ID, FRIEND_ID, FRIENDSHIP_STATUS) " +
-                                    "VALUES (?, ?, 2)", user.getId(), friendId
-                    );
+                    jdbcT.update(INSERT_USERS_FRIENDS_STATUS_UNCONFIRMED_SQL, user.getId(), friendId);
                 }
             }
             log.info("Пользователь c Id:{} обновлен", user.getId());
@@ -127,9 +138,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(int id) {
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT * FROM USERS WHERE USER_ID = ?", id
-        );
+        SqlRowSet userRow = jdbcT.queryForRowSet(GET_USER_BY_ID_SQL, id);
         if (userRow.next()) {
             User user = new User(
                     userRow.getString("EMAIL"),
@@ -139,9 +148,7 @@ public class UserDbStorage implements UserStorage {
             );
             user.setId(userRow.getInt("USER_ID"));
             log.info("Пользователь c Id:{} найден", id);
-            SqlRowSet friendRow = jdbcT.queryForRowSet(
-                    "SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?", id
-            );
+            SqlRowSet friendRow = jdbcT.queryForRowSet(GET_FRIEND_BY_USER_ID_SQL, id);
             while (friendRow.next()) {
                 user.addFriend(friendRow.getInt("FRIEND_ID"));
             }
@@ -182,15 +189,11 @@ public class UserDbStorage implements UserStorage {
     @Override
     public String deleteUserById(int id) {
         SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT * FROM USERS WHERE USER_ID = ?", id
+                GET_USER_BY_ID_SQL, id
         );
         if (userRow.next()) {
-            jdbcT.update(
-                    "DELETE FROM FRIENDS WHERE USER_ID = ? OR FRIEND_ID = ?", id, id
-            );
-            jdbcT.update(
-                    "DELETE FROM USERS WHERE USER_ID = ?", id
-            );
+            jdbcT.update(DELETE_FRIENDS_BY_USER_AND_FRIEND_ID_SQL, id, id);
+            jdbcT.update(DELETE_USER_BY_ID_SQL, id);
             log.info("Пользователь c id:{} удален", id);
             return String.format("Пользователь c id:%s удален", id);
         } else {
@@ -241,11 +244,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     public String getFriendshipStatus(int userId, int friendId) {
-        SqlRowSet statusRow = jdbcT.queryForRowSet(
-                "SELECT FS.NAME AS STATUS FROM FRIENDS " +
-                        "JOIN FRIENDSHIP_STATUS FS on FS.STATUS_ID = FRIENDS.FRIENDSHIP_STATUS " +
-                        "WHERE USER_ID = ? AND FRIEND_ID =? ", userId, friendId
-        );
+        SqlRowSet statusRow = jdbcT.queryForRowSet(GET_FRIENDSHIP_STATUS_BY_USER_AND_FRIEND_ID_SQL, userId, friendId);
         if (statusRow.next()) {
             return statusRow.getString("STATUS");
         }

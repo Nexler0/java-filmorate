@@ -30,7 +30,6 @@ public class FilmController {
         return filmService.getFilmById(id);
     }
 
-    //GET /films/popular?count={limit}&genreId={genreId}&year={year}
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(name = "count", defaultValue = "10") Integer count,
                                       @RequestParam(name = "genreId", required = false) Integer genreId,

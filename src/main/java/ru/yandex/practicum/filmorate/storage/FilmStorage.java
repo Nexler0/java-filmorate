@@ -30,10 +30,6 @@ public interface FilmStorage {
     /**
      * Метод возвращает список фильмов режиссера отсортированных по количеству лайков или году выпуска
      * The method returns a list of the director's films sorted by number of likes or year of release.
-     *
-     * @param directorId
-     * @param param
-     * @return
      */
     List<Film> getSortByParamFilms(Integer directorId, String param);
 

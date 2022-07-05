@@ -28,8 +28,6 @@ public class DirectorController {
     /**
      * Запрос на создание нового директора, добавление его в таблицу
      * Post add new director and add him to DB
-     * @param director
-     * @return
      */
     @PostMapping
     public Director create(@RequestBody Director director){
@@ -46,9 +44,6 @@ public class DirectorController {
     /**
      * Запрос на получение директора из таблицы по его ID
      * Get directors by ID from DB
-     *
-     * @param directorId
-     * @return
      */
     @GetMapping("/{id}")
     public Optional<Director> directorById(@PathVariable("id") Integer directorId) {
@@ -62,9 +57,6 @@ public class DirectorController {
     /**
      * Запрос на обновление директора
      * Update old director
-     *
-     * @param director
-     * @return
      */
     @PutMapping
     public Optional<Director> update(@RequestBody Director director) {
@@ -83,8 +75,6 @@ public class DirectorController {
     /**
      * Запрос на получение списка всех директоров
      * Get all directors from DB
-     *
-     * @return
      */
     @GetMapping
     public List<Director> allDirectors() {
@@ -94,8 +84,6 @@ public class DirectorController {
     /**
      * Запрос на удаление директора по его ID из DB
      * Delete Directors from DB
-     * @param directorId
-     * @return
      */
     @DeleteMapping("/{id}")
     public String deleteDirector(@PathVariable("id") Integer directorId) {

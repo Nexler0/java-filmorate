@@ -12,6 +12,8 @@ import java.util.*;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private static final int GENRE_ID_START = 1;
+    private static final int GENRE_ID_FINISH = 6;
 
     public FilmService(FilmStorage filmDbStorage) {
         this.filmStorage = filmDbStorage;
@@ -95,7 +97,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
-        if (genreId < 1 || genreId > 6) {
+        if (genreId < GENRE_ID_START || genreId > GENRE_ID_FINISH) {
             throw new NotFoundException("Такого жанра не существует!");
         } else {
             return filmStorage.getPopularFilmsByGenre(count, genreId);
@@ -103,7 +105,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
-        if (genreId < 1 || genreId > 6) {
+        if (genreId < GENRE_ID_START || genreId > GENRE_ID_FINISH) {
             throw new NotFoundException("Такого жанра не существует!");
         } else {
             return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);

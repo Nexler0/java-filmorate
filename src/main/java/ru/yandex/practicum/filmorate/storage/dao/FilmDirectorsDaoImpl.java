@@ -20,14 +20,23 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
     private final Logger log = LoggerFactory.getLogger(FilmDirectorsDaoImpl.class);
     private final JdbcTemplate jdbcTemplate;
 
+    private static final String INSERT_DIRECTOR_BY_FILM_ID_SQL =
+            "INSERT INTO FILMS_DIRECTORS (FILM_ID, DIRECTOR_ID) VALUES (?, ?)";
+    private static final String DELETE_DIRECTOR_BY_ID_AND_FILM_ID_SQL =
+            "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ? AND DIRECTOR_ID = ?";
+    private static final String GET_DIRECTOR_BY_FILM_ID_AND_ID_SQL =
+            "SELECT * FROM FILMS_DIRECTORS WHERE FILM_ID = ? AND DIRECTOR_ID = ?";
+    private static final String GET_DIRECTOR_BY_FILM_ID =
+            "SELECT * from FILMS_DIRECTORS WHERE FILM_ID = ";
+    private static final String GET_DIRECTOR_BY_ID =
+            "SELECT * from FILMS_DIRECTORS WHERE DIRECTOR_ID = ";
+
     public FilmDirectorsDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-
     @Override
     public void addDirectorToFilm(Integer filmId, Integer directorId) {
-        String insertQuery = "insert into FILMS_DIRECTORS (FILM_ID, DIRECTOR_ID) values (?, ?)";
-        int status = jdbcTemplate.update(insertQuery, filmId, directorId);
+        int status = jdbcTemplate.update(INSERT_DIRECTOR_BY_FILM_ID_SQL, filmId, directorId);
         if (status != 0) {
             log.info("Добавлен директор к фильму: ID {}", filmId);
         } else {
@@ -37,25 +46,20 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
 
     @Override
     public void deleteDirectorFromFilm(Integer filmId, Integer directorId) {
-        String sql = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ? AND DIRECTOR_ID = ?";
         Object[] args = new Object[]{filmId, directorId};
-        jdbcTemplate.update(sql, args);
+        jdbcTemplate.update(DELETE_DIRECTOR_BY_ID_AND_FILM_ID_SQL, args);
         log.info("Удален директор у фильма идентификатором {} {}", filmId, directorId);
     }
 
     @Override
     public boolean containsDirectorInFilmById(Integer filmId, Integer directorId) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from FILMS_DIRECTORS where FILM_ID = ? AND DIRECTOR_ID = ?", filmId, directorId);
-        if (userRows.next()) {
-            return true;
-        } else {
-            return false;
-        }
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(GET_DIRECTOR_BY_FILM_ID_AND_ID_SQL, filmId, directorId);
+        return userRows.next();
     }
 
     @Override
     public List<FilmDirector> findDirectorByFilms(Integer filmId) {
-        String sql = "SELECT * from FILMS_DIRECTORS WHERE FILM_ID = " + filmId;
+        String sql = GET_DIRECTOR_BY_FILM_ID + filmId;
         log.info("Запрос на получение всех директоров у фильма.");
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmDirectors(rs));
     }
@@ -69,7 +73,7 @@ public class FilmDirectorsDaoImpl implements FilmDirectorsDao {
 
     @Override
     public List<FilmDirector> findFilmByDirector(Integer directorId) {
-        String sql = "SELECT * from FILMS_DIRECTORS WHERE DIRECTOR_ID = " + directorId;
+        String sql = GET_DIRECTOR_BY_ID + directorId;
         log.info("Запрос на получение всех фильмов у директора.");
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirectorFilms(rs));
     }

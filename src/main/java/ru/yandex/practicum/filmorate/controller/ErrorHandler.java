@@ -32,7 +32,7 @@ public class ErrorHandler {
 
     @ExceptionHandler({GetRecommendedFilmsErrorException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse GetRecommendedFilmsErrorExceptionHandler(final GetRecommendedFilmsErrorException exception) {
+    public ErrorResponse getRecommendedFilmsErrorExceptionHandler(final GetRecommendedFilmsErrorException exception) {
         log.warn("Error: {}, Description: {}, message: {}", exception.getError(), exception.getDescription(),
                 exception.getMessage());
         return new ErrorResponse(exception.getError(), exception.getDescription());

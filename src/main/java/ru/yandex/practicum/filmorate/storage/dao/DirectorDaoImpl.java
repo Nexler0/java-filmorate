@@ -23,6 +23,12 @@ public class DirectorDaoImpl implements DirectorDao {
     private final Logger log = LoggerFactory.getLogger(DirectorDaoImpl.class);
     private final JdbcTemplate jdbcTemplate;
 
+    private static final String INSERT_DIRECTORS_SQL = "INSERT INTO DIRECTORS (name) VALUES (?)";
+    private static final String UPDATE_DIRECTORS_SQL = "UPDATE DIRECTORS SET NAME = ? WHERE id = ? ";
+    private static final String SELECT_DIRECTOR_AT_ID_SQL = "SELECT * FROM DIRECTORS WHERE ID = ?";
+    private static final String DELETE_DIRECTOR_BY_ID_SQL = "DELETE FROM DIRECTORS WHERE id = ?";
+    private static final String SELECT_ALL_DIRECTORS_SQL = "SELECT * FROM DIRECTORS";
+
     @Autowired
     public DirectorDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -32,7 +38,7 @@ public class DirectorDaoImpl implements DirectorDao {
     public Optional<Director> addDirector(Director director) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO DIRECTORS (name) VALUES (?)", new String[]{"ID"});
+            PreparedStatement ps = connection.prepareStatement(INSERT_DIRECTORS_SQL, new String[]{"ID"});
             ps.setString(1, director.getName());
             return ps;
         }, keyHolder);
@@ -44,15 +50,14 @@ public class DirectorDaoImpl implements DirectorDao {
     @Override
     public Optional<Director> updateDirectors(Director director) {
         jdbcTemplate.update(
-                "UPDATE DIRECTORS SET NAME = ? " +
-                        "WHERE id = ? ", director.getName(), director.getId());
+                UPDATE_DIRECTORS_SQL, director.getName(), director.getId());
         log.info("Директор добавлен: name {}", director.getName());
         return Optional.of(director);
     }
 
     @Override
     public Optional<Director> getDirById(Integer id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from DIRECTORS where id = ?", id);
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(SELECT_DIRECTOR_AT_ID_SQL, id);
         if (userRows.next()) {
             log.info("Директор найден: {} {}", userRows.getInt("id"), userRows.getString("name"));
             Director director = Director.builder()
@@ -70,13 +75,13 @@ public class DirectorDaoImpl implements DirectorDao {
     public void deleteDirector(Integer id) {
         Object[] args = new Object[]{id};
         log.info("Директор с идентификатором {} удален.", id);
-        jdbcTemplate.update("DELETE FROM DIRECTORS WHERE id = ?", args);
+        jdbcTemplate.update(DELETE_DIRECTOR_BY_ID_SQL, args);
     }
 
     @Override
     public List<Director> getAllDirector() {
         log.info("Запрос на получение всех директоров.");
-        return jdbcTemplate.query("SELECT * FROM DIRECTORS", (rs, rowNum) -> makeDirectors(rs));
+        return jdbcTemplate.query(SELECT_ALL_DIRECTORS_SQL, (rs, rowNum) -> makeDirectors(rs));
 
     }
 
@@ -89,11 +94,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public boolean containsById(Integer id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from DIRECTORS where id = ?", id);
-        if (userRows.next()) {
-            return true;
-        } else {
-            return false;
-        }
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(SELECT_DIRECTOR_AT_ID_SQL, id);
+        return userRows.next();
     }
 }

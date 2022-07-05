@@ -61,6 +61,103 @@ public class FilmDbStorage implements FilmStorage {
                     "    AND film_id NOT IN (SELECT * FROM films_liked)" +
                     "GROUP BY film_id " +
                     "ORDER BY rate DESC";
+    private static final String SELECT_ALL_FILM_WITH_GENRE_RATE_SQL =
+            "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                    "R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE ";
+    private static final String GET_LAST_ID_COUNT_SQL = "SELECT FILM_ID AS COUNT FROM FILMS ORDER BY FILM_ID DESC";
+    private static final String GET_FILM_BY_ID_SQL = "SELECT * FROM FILMS WHERE FILM_ID = ?";
+    private static final String GET_FILM_ORDER_BY_USER_RATE_WITH_LIMIT_SQL =
+            "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                    "R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "ORDER BY USER_RATE DESC LIMIT ? ";
+    private static final String GET_LIKES_BY_FILM_ID_SQL = "SELECT * FROM LIKES WHERE FILM_ID =?";
+    private static final String DELETE_DIRECTORS_BY_FILM_ID_SQL = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?";
+    private static final String DELETE_LIKES_BY_FILM_ID_SQL = "DELETE FROM LIKES WHERE FILM_ID = ?";
+    private static final String DELETE_GENRE_BY_FILM_ID_SQL = "DELETE FROM FILMS_GENRE WHERE FILM_ID = ?";
+    private static final String DELETE_FILM_BY_FILM_ID_SQL = "DELETE FROM FILMS WHERE FILM_ID = ?";
+    private static final String CHECK_FILM_IN_DB_SQL = "SELECT * FROM FILMS WHERE NAME = ? AND DESCRIPTION = ? AND RELEASE_DATE = ?";
+    private static final String GET_FILM_BY_ID_WITH_GENRE_RATE_SQL =
+            "SELECT *, G2.GENRE_ID AS GENRE_ID, G2.NAME AS GENRE_NAME, " +
+                    "R.RATE_ID AS RATE_ID, R.NAME AS RATE_NAME " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE FILMS.FILM_ID = ?";
+    private static final String GET_GENRE_BY_FILM_ID_SQL = "SELECT * FROM FILMS_GENRE WHERE FILM_ID = ?";
+    private static final String INSERT_FILM_INTO_FILMS_SQL =
+            "INSERT INTO FILMS (FILM_ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATE, USER_RATE)" +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_GENRE_BY_FILM_ID_SQL = "INSERT INTO FILMS_GENRE (FILM_ID, GENRE_ID) VALUES (?, ?)";
+    private static final String INSERT_LIKES_BY_FILM_ID_SQL = "INSERT INTO LIKES (FILM_ID, USER_ID) VALUES (?, ?)";
+
+    private static final String UPDATE_FILM_BY_FILM_ID_SQL =
+            "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, " +
+                    "DURATION = ?, RATE = ?, USER_RATE= ? " +
+                    "WHERE FILM_ID = ?";
+    private static final String GET_ALL_LIKES_SQL = "SELECT * FROM LIKES";
+    private static final String GET_SORTED_FILMS_BY_YEAR =
+            "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE FILMS.FILM_ID IN (" +
+                    "        SELECT FILM_ID" +
+                    "        FROM FILMS_DIRECTORS " +
+                    "        WHERE DIRECTOR_ID = ?" +
+                    ") " +
+                    "ORDER BY RELEASE_DATE";
+    private static final String GET_SORT_BY_LIKES_FILMS =
+            "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE FILMS.FILM_ID IN (" +
+                    "        SELECT FILM_ID" +
+                    "        FROM FILMS_DIRECTORS " +
+                    "        WHERE DIRECTOR_ID = ?" +
+                    ") " +
+                    "ORDER BY USER_RATE DESC";
+    private static final String SQL_GET_COMMON_FILMS_ID_LIST =
+            "WITH common_films_id AS (SELECT film_id, COUNT(*)\n" +
+                    "                         FROM LIKES\n" +
+                    "                         WHERE user_id IN (?, ?)\n" +
+                    "                         GROUP BY film_id\n" +
+                    "                         HAVING COUNT(*) = 2)\n" +
+                    "SELECT film_id, COUNT(*)\n" +
+                    "FROM likes\n" +
+                    "WHERE film_id IN (SELECT film_id FROM common_films_id)\n" +
+                    "GROUP BY film_id\n" +
+                    "ORDER BY COUNT(*) DESC";
+    private static final String GET_POPULAR_FILM_BY_YEAR_SQL =
+            "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                    "R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE EXTRACT(YEAR FROM RELEASE_DATE) = ? " +
+                    "ORDER BY USER_RATE DESC LIMIT ? ";
+    private static final String GET_POPULAR_FILMS_BY_GENRE_YEAR_SQL =
+            "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
+                    "R.RATE_ID AS RATE_ID " +
+                    "FROM FILMS " +
+                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
+                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
+                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
+                    "WHERE EXTRACT(YEAR FROM RELEASE_DATE) = ? " +
+                    "AND G2.GENRE_ID = ? " +
+                    "ORDER BY USER_RATE DESC LIMIT ? ";
 
     public FilmDbStorage(JdbcTemplate jdbcT, UserDbStorage userDbStorage, FilmDirectorsDao filmDirectorsDao, DirectorDao directorDao) {
         this.jdbcT = jdbcT;
@@ -73,12 +170,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> findAllFilms() {
         List<Film> filmList = new ArrayList<>();
         SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
-                        "R.RATE_ID AS RATE_ID " +
-                        "FROM FILMS " +
-                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE "
+                SELECT_ALL_FILM_WITH_GENRE_RATE_SQL
         );
         return getFilmsList(filmList, userRow);
     }
@@ -86,9 +178,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         if (!checkFilmInDb(film)) {
-            SqlRowSet userRow = jdbcT.queryForRowSet(
-                    "SELECT FILM_ID AS COUNT FROM FILMS ORDER BY FILM_ID DESC"
-            );
+            SqlRowSet userRow = jdbcT.queryForRowSet(GET_LAST_ID_COUNT_SQL);
             if (userRow.first()) {
                 filmId = userRow.getInt("COUNT");
             }
@@ -105,9 +195,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT * FROM FILMS WHERE FILM_ID = ?", film.getId()
-        );
+        SqlRowSet userRow = jdbcT.queryForRowSet(GET_FILM_BY_ID_SQL, film.getId());
         if (userRow.next()) {
             return updateFilmInDb(film);
         } else {
@@ -119,13 +207,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getPopularFilms(int count) {
         List<Film> filmList = new ArrayList<>();
         SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
-                        "R.RATE_ID AS RATE_ID " +
-                        "FROM FILMS " +
-                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                        "ORDER BY USER_RATE DESC LIMIT ? ", count
+                GET_FILM_ORDER_BY_USER_RATE_WITH_LIMIT_SQL, count
         );
         return getFilmsList(filmList, userRow);
     }
@@ -134,7 +216,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmById(int id) {
         Film film = getFilmFromDbById(id);
         SqlRowSet likesRow = jdbcT.queryForRowSet(
-                "SELECT * FROM LIKES WHERE FILM_ID =?", id
+                GET_LIKES_BY_FILM_ID_SQL, id
         );
         while (likesRow.next()) {
             film.addUserLike(likesRow.getInt("USER_ID"));
@@ -156,10 +238,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public String deleteTheMovie(int id) {
         if (getFilmById(id) != null) {
-            jdbcT.update("DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?", id);
-            jdbcT.update("DELETE FROM LIKES WHERE FILM_ID = ?", id);
-            jdbcT.update("DELETE FROM FILMS_GENRE WHERE FILM_ID = ?", id);
-            jdbcT.update("DELETE FROM FILMS WHERE FILM_ID = ?", id);
+            jdbcT.update(DELETE_DIRECTORS_BY_FILM_ID_SQL, id);
+            jdbcT.update(DELETE_LIKES_BY_FILM_ID_SQL, id);
+            jdbcT.update(DELETE_GENRE_BY_FILM_ID_SQL, id);
+            jdbcT.update(DELETE_FILM_BY_FILM_ID_SQL, id);
             log.info("Фильм c id:{} удален", id);
             return String.format("Фильм c id:%s удален", id);
         } else {
@@ -188,25 +270,15 @@ public class FilmDbStorage implements FilmStorage {
 
 
     private boolean checkFilmInDb(Film film) {
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT * FROM FILMS WHERE NAME = ? AND DESCRIPTION = ? AND RELEASE_DATE = ?",
-                film.getName(), film.getDescription(), film.getReleaseDate()
-        );
+        SqlRowSet userRow = jdbcT.queryForRowSet(CHECK_FILM_IN_DB_SQL, film.getName(),
+                film.getDescription(), film.getReleaseDate());
         return userRow.next();
     }
 
     private Film getFilmFromDbById(int id) {
         Film film = null;
 
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT *, G2.GENRE_ID AS GENRE_ID, G2.NAME AS GENRE_NAME, " +
-                        "R.RATE_ID AS RATE_ID, R.NAME AS RATE_NAME " +
-                        "FROM FILMS " +
-                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                        "WHERE FILMS.FILM_ID = ?", id
-        );
+        SqlRowSet userRow = jdbcT.queryForRowSet(GET_FILM_BY_ID_WITH_GENRE_RATE_SQL, id);
         if (userRow.next()) {
             film = new Film(userRow.getString("NAME"),
                     userRow.getString("RELEASE_DATE"),
@@ -216,7 +288,7 @@ public class FilmDbStorage implements FilmStorage {
             film.setMpa(new Mpa(userRow.getInt("RATE_ID")));
         }
         SqlRowSet likesRow = jdbcT.queryForRowSet(
-                "SELECT USER_ID FROM LIKES WHERE FILM_ID = ?", id
+                GET_LIKES_BY_FILM_ID_SQL, id
         );
         while (likesRow.next()) {
             assert film != null;
@@ -224,13 +296,13 @@ public class FilmDbStorage implements FilmStorage {
         }
         if (film != null) {
             SqlRowSet genreRow = jdbcT.queryForRowSet(
-                    "SELECT * FROM FILMS_GENRE WHERE FILM_ID = ?", id
+                    GET_GENRE_BY_FILM_ID_SQL, id
             );
             while (genreRow.next()) {
                 film.addGenre(new Genre(genreRow.getInt("GENRE_ID")));
             }
             //Получение списка директоров для фильма
-            SqlRowSet filmRows = jdbcT.queryForRowSet("select * from FILMS where FILM_ID = ?", id);
+            SqlRowSet filmRows = jdbcT.queryForRowSet(GET_FILM_BY_ID_SQL, id);
             if (filmRows.next()) {
                 if (!filmDirectorsDao.findDirectorByFilms(id).isEmpty()) {
                     List<FilmDirector> listOfDirectors = filmDirectorsDao.findDirectorByFilms(id);
@@ -253,31 +325,23 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film insertFilmInDb(Film film) {
-        jdbcT.update("DELETE FROM LIKES WHERE FILM_ID = ?", film.getId());
-        jdbcT.update("DELETE FROM FILMS_GENRE WHERE FILM_ID = ?", film.getId());
-        jdbcT.update("DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?", film.getId());
-        jdbcT.update("DELETE FROM FILMS WHERE FILM_ID = ?", film.getId());
-        jdbcT.update("DELETE FROM FILMS_GENRE WHERE FILM_ID = ?", film.getId());
-        jdbcT.update("DELETE FROM LIKES WHERE FILM_ID = ?", film.getId());
+        jdbcT.update(DELETE_LIKES_BY_FILM_ID_SQL, film.getId());
+        jdbcT.update(DELETE_GENRE_BY_FILM_ID_SQL, film.getId());
+        jdbcT.update(DELETE_DIRECTORS_BY_FILM_ID_SQL, film.getId());
+        jdbcT.update(DELETE_FILM_BY_FILM_ID_SQL, film.getId());
+        jdbcT.update(DELETE_LIKES_BY_FILM_ID_SQL, film.getId());
         jdbcT.update(
-                "INSERT INTO FILMS (FILM_ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATE, USER_RATE)" +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)", film.getId(), film.getName(), film.getDescription(),
+                INSERT_FILM_INTO_FILMS_SQL, film.getId(), film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getRate()
         );
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
-                jdbcT.update(
-                        "INSERT INTO FILMS_GENRE (FILM_ID, GENRE_ID) VALUES (?, ?)", film.getId(),
-                        genre.getId()
-                );
+                jdbcT.update(INSERT_GENRE_BY_FILM_ID_SQL, film.getId(), genre.getId());
             }
         }
         if (film.getLikesId() != null) {
             for (int like : film.getLikesId()) {
-                jdbcT.update(
-                        "INSERT INTO LIKES (FILM_ID, USER_ID) VALUES (?, ?)", film.getId(),
-                        like
-                );
+                jdbcT.update(INSERT_LIKES_BY_FILM_ID_SQL, film.getId(), like);
             }
         }
         //Добавление директора к фильму если он есть в теле
@@ -298,20 +362,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film updateFilmInDb(Film film) {
-        jdbcT.update(
-                "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, " +
-                        "DURATION = ?, RATE = ?, USER_RATE= ? " +
-                        "WHERE FILM_ID = ?",
-                film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
-                film.getMpa().getId(), film.getRate(), film.getId()
-        );
-        jdbcT.update("DELETE FROM FILMS_GENRE WHERE FILM_ID = ?", film.getId());
+        jdbcT.update(UPDATE_FILM_BY_FILM_ID_SQL, film.getName(), film.getDescription(), film.getReleaseDate(),
+                film.getDuration(), film.getMpa().getId(), film.getRate(), film.getId());
+        jdbcT.update(DELETE_GENRE_BY_FILM_ID_SQL, film.getId());
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
-                jdbcT.update(
-                        "INSERT INTO FILMS_GENRE (FILM_ID, GENRE_ID) VALUES (?, ?)",
-                        film.getId(), genre.getId()
-                );
+                jdbcT.update(INSERT_GENRE_BY_FILM_ID_SQL, film.getId(), genre.getId());
             }
         }
         Film film1 = new Film(film.getName(), film.getReleaseDate(), film.getDescription(),
@@ -347,15 +403,6 @@ public class FilmDbStorage implements FilmStorage {
                     }
                 }
                 return getFilmById(film1.getId());
-            } else {
-                for (Director director : listOfDirectors) {
-                    if (directorDao.containsById(director.getId())) {
-                        filmDirectorsDao.addDirectorToFilm(film1.getId(), director.getId());
-                    } else {
-                        throw new NotFoundException("Такого директора в спике нет!");
-                    }
-                    return getFilmById(film1.getId());
-                }
             }
         } else {
             List<FilmDirector> listDir = filmDirectorsDao.findDirectorByFilms(film1.getId());
@@ -374,14 +421,12 @@ public class FilmDbStorage implements FilmStorage {
                     userRow.getInt("DURATION"));
             film.setId(userRow.getInt("FILM_ID"));
             film.setMpa(new Mpa(userRow.getInt("RATE_ID")));
-            SqlRowSet genreRow = jdbcT.queryForRowSet(
-                    "SELECT * FROM FILMS_GENRE WHERE FILM_ID = ?", film.getId()
-            );
+            SqlRowSet genreRow = jdbcT.queryForRowSet(GET_GENRE_BY_FILM_ID_SQL, film.getId());
             while (genreRow.next()) {
                 film.addGenre(new Genre(genreRow.getInt("GENRE_ID")));
             }
             //Получение списка директоров для фильма
-            SqlRowSet filmRows = jdbcT.queryForRowSet("select * from FILMS where FILM_ID = ?", film.getId());
+            SqlRowSet filmRows = jdbcT.queryForRowSet(GET_FILM_BY_ID_SQL, film.getId());
             if (filmRows.next()) {
                 if (!filmDirectorsDao.findDirectorByFilms(film.getId()).isEmpty()) {
                     List<FilmDirector> listOfDirectors = filmDirectorsDao.findDirectorByFilms(film.getId());
@@ -409,9 +454,7 @@ public class FilmDbStorage implements FilmStorage {
                 }
             }
         }
-        SqlRowSet likesRow = jdbcT.queryForRowSet(
-                "SELECT * FROM LIKES"
-        );
+        SqlRowSet likesRow = jdbcT.queryForRowSet(GET_ALL_LIKES_SQL);
         while (likesRow.next()) {
             try {
                 filmList.stream().filter(film -> film.getId() == (likesRow.getInt("FILM_ID")))
@@ -459,74 +502,32 @@ public class FilmDbStorage implements FilmStorage {
     /**
      * Метод получения фильмов директора по годам
      * Method for obtaining director's films by year
-     *
-     * @param directorId
-     * @return
      */
     private List<Film> getSortByYearFilms(Integer directorId) {
         if (directorDao.containsById(directorId)) {
-            String sqlQuery = "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
-                    "FROM FILMS " +
-                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                    "WHERE FILMS.FILM_ID IN (" +
-                    "        SELECT FILM_ID" +
-                    "        FROM FILMS_DIRECTORS " +
-                    "        WHERE DIRECTOR_ID = ?" +
-                    ") " +
-                    "ORDER BY RELEASE_DATE";
-
             List<Film> filmList = new ArrayList<>();
-            SqlRowSet userRow = jdbcT.queryForRowSet(sqlQuery, directorId);
+            SqlRowSet userRow = jdbcT.queryForRowSet(GET_SORTED_FILMS_BY_YEAR, directorId);
             return getFilmsList(filmList, userRow);
         } else {
             throw new NotFoundException("Такого директора нет!");
         }
-
     }
 
     /**
      * Метод получения фильмов директора по лайкам
      * Method for getting director's films by likes
-     *
-     * @param directorId
-     * @return
      */
     private List<Film> getSortByLikesFilms(Integer directorId) {
         //проверить его в БД а потом если есть выводить
         if (directorDao.containsById(directorId)) {
-            String sqlQuery = "SELECT *, G2.GENRE_ID AS GENRE_ID, R.RATE_ID AS RATE_ID " +
-                    "FROM FILMS " +
-                    "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                    "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                    "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                    "WHERE FILMS.FILM_ID IN (" +
-                    "        SELECT FILM_ID" +
-                    "        FROM FILMS_DIRECTORS " +
-                    "        WHERE DIRECTOR_ID = ?" +
-                    ") " +
-                    "ORDER BY USER_RATE DESC";
-
             List<Film> filmList = new ArrayList<>();
-            SqlRowSet userRow = jdbcT.queryForRowSet(sqlQuery, directorId);
+            SqlRowSet userRow = jdbcT.queryForRowSet(GET_SORT_BY_LIKES_FILMS, directorId);
             return getFilmsList(filmList, userRow);
         } else {
             throw new NotFoundException("Такого директора нет!");
         }
     }
 
-    private static final String SQL_GET_COMMON_FILMS_ID_LIST =
-            "WITH common_films_id AS (SELECT film_id, COUNT(*)\n" +
-                    "                         FROM LIKES\n" +
-                    "                         WHERE user_id IN (?, ?)\n" +
-                    "                         GROUP BY film_id\n" +
-                    "                         HAVING COUNT(*) = 2)\n" +
-                    "SELECT film_id, COUNT(*)\n" +
-                    "FROM likes\n" +
-                    "WHERE film_id IN (SELECT film_id FROM common_films_id)\n" +
-                    "GROUP BY film_id\n" +
-                    "ORDER BY COUNT(*) DESC";
 
     //Возвращает список фильмов, отсортированных по популярности.
     public Collection<Film> getCommonFilms(int userId, int friendId) {
@@ -578,52 +579,26 @@ public class FilmDbStorage implements FilmStorage {
         return getFilmsList(filmList, userRow);
     }
 
+
     @Override
     public List<Film> getPopularFilmsByYear(Integer count, Integer year) {
         List<Film> filmList = new ArrayList<>();
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
-                        "R.RATE_ID AS RATE_ID " +
-                        "FROM FILMS " +
-                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                        "WHERE EXTRACT(YEAR FROM RELEASE_DATE) = ? " +
-                        "ORDER BY USER_RATE DESC LIMIT ? ", year, count
-        );
+        SqlRowSet userRow = jdbcT.queryForRowSet(GET_POPULAR_FILM_BY_YEAR_SQL, year, count);
         return getFilmsList(filmList, userRow);
     }
 
     @Override
     public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
         List<Film> filmList = new ArrayList<>();
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
-                        "R.RATE_ID AS RATE_ID " +
-                        "FROM FILMS " +
-                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                        "WHERE G2.GENRE_ID = ? " +
-                        "ORDER BY USER_RATE DESC LIMIT ? ", genreId, count
-        );
+        SqlRowSet userRow = jdbcT.queryForRowSet(GET_POPULAR_FILM_BY_YEAR_SQL, genreId, count);
         return getFilmsList(filmList, userRow);
     }
+
 
     @Override
     public List<Film> getPopularFilmsByGenreAndYear(Integer count, Integer genreId, Integer year) {
         List<Film> filmList = new ArrayList<>();
-        SqlRowSet userRow = jdbcT.queryForRowSet(
-                "SELECT *, G2.GENRE_ID AS GENRE_ID, " +
-                        "R.RATE_ID AS RATE_ID " +
-                        "FROM FILMS " +
-                        "LEFT JOIN FILMS_GENRE AS FG on FG.FILM_ID = FILMS.FILM_ID " +
-                        "LEFT JOIN GENRE AS G2 on G2.GENRE_ID = FG.GENRE_ID " +
-                        "LEFT JOIN RATE AS R on R.RATE_ID = FILMS.RATE " +
-                        "WHERE EXTRACT(YEAR FROM RELEASE_DATE) = ? " +
-                        "AND G2.GENRE_ID = ? " +
-                        "ORDER BY USER_RATE DESC LIMIT ? ", year, genreId, count
-        );
+        SqlRowSet userRow = jdbcT.queryForRowSet(GET_POPULAR_FILMS_BY_GENRE_YEAR_SQL, year, genreId, count);
         return getFilmsList(filmList, userRow);
     }
 }
