@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.director.Director;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -22,30 +23,39 @@ public class Film {
     @NotBlank
     private final String releaseDate;
     private final int duration;
-    private int rate;
     private List<Integer> likesId;
     private Mpa mpa;
     private List<Genre> genres;
+    private List<Director> directors;
 
 
-    public Film(String name, String releaseDate, String description, int duration, int rate) {
+    public Film(String name, String releaseDate, String description, int duration) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.rate = rate;
         likesId = new ArrayList<>();
     }
 
+    public int getRate() {
+        return likesId.size();
+    }
+
     public String addUserLike(int userId) {
-        rate++;
+        if (userId > 0 && !likesId.contains(userId)) {
+            likesId.add(userId);
+            return String.format("Пользователь c id: %s, добавил лайк", id);
+        } else {
+            return "Лайк не добавлен";
+        }
+    }
+
+    public void fillLikesList(int userId) {
         likesId.add(userId);
-        return String.format("Пользователь c id: %s, добавил лайк", id);
     }
 
     public String deleteUserLike(int userId) {
         if (likesId.contains(userId)) {
-            rate--;
             likesId.removeIf(id -> id == userId);
             return String.format("Пользователь c id: %s, удалил лайк", id);
         }
@@ -68,12 +78,17 @@ public class Film {
         });
     }
 
-    public void createGenreStorage(){
+    public void createGenreStorage() {
         if (genres == null) {
             genres = new ArrayList<>();
         }
     }
 
+    public void createDirectorsStorage() {
+        if (directors == null) {
+            directors = new ArrayList<>();
+        }
+    }
 
     @Override
     public boolean equals(Object o) {

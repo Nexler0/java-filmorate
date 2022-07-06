@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
-public class ValidationException extends RuntimeException {
+public class EmptyReviewsListException extends RuntimeException {
     private final String message;
 
-    public ValidationException(String message) {
+    public EmptyReviewsListException(String message) {
         this.message = message;
     }
 

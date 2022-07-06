@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -30,8 +31,23 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(name = "count", defaultValue = "10") Integer count,
+                                      @RequestParam(name = "genreId", required = false) Integer genreId,
+                                      @RequestParam(name = "year", required = false) Integer year) {
+        if (genreId == null && year == null) {
+            return filmService.getPopularFilms(count);
+        } else if (genreId == null) {
+            return filmService.getPopularFilmsByYear(count, year);
+        } else if (year == null) {
+            return filmService.getPopularFilmsByGenre(count, genreId);
+        } else {
+            return filmService.getPopularFilmsByGenreAndYear(count, genreId, year);
+        }
+    }
+
+    @GetMapping("/search")
+    public List<Film> getFilmsWithRequestedSearchParameters(@RequestParam String query, @RequestParam String by) {
+        return filmService.getFilmsWithRequestedSearchParameters(query, by);
     }
 
     @PostMapping
@@ -55,7 +71,23 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}")
-    public String deleteTheMovie(@PathVariable int id){
+    public String deleteTheMovie(@PathVariable int id) {
         return filmService.deleteTheMovie(id);
     }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getSortByParamFilms(@PathVariable Integer directorId,
+                                          @RequestParam(name = "sortBy",
+                                                  required = false) String param) {
+        return filmService.getSortByParamFilms(directorId, param);
+    }
+
+    //Возвращает список фильмов, отсортированных по популярности.
+    @GetMapping("/common")
+    public Collection<Film> getCommonFilms(@RequestParam("userId") int userId
+            , @RequestParam("friendId") int friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+
 }

@@ -16,16 +16,16 @@ import java.util.List;
 public class GenreController {
 
     @GetMapping
-    public List<Genre> getAllGenres(){
+    public List<Genre> getAllGenres() {
         List<Genre> rates = new ArrayList<>();
-        for (int i = 1; i <= 6; i++){
+        for (int i = 1; i <= 6; i++) {
             rates.add(new Genre(i));
         }
         return rates;
     }
 
     @GetMapping("/{id}")
-    public Genre getGenreById(@PathVariable int id){
+    public Genre getGenreById(@PathVariable int id) {
         return new Genre(id);
     }
 }
