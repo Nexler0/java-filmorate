@@ -24,6 +24,7 @@ public class User {
     @NotBlank
     private String birthday;
     private List<Integer> friendsList = new ArrayList<>();
+    private List<Integer> eventsList = new ArrayList<>();
 
     public User(String email, String login, String name, String birthday) {
         this.email = email;

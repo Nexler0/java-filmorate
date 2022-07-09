@@ -10,10 +10,8 @@ import ru.yandex.practicum.filmorate.exceptions.GetCommonFilmsErrorException;
 import ru.yandex.practicum.filmorate.exceptions.GetRecommendedFilmsErrorException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.model.director.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.director.FilmDirector;
 import ru.yandex.practicum.filmorate.storage.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.FilmDirectorsDao;
@@ -232,6 +230,7 @@ public class FilmDbStorage implements FilmStorage {
             result = film.addUserLike(userId);
             insertFilmInDb(film);
         }
+        Event.addEventIntoDataBase(userId, id, OperationType.ADD, EventType.LIKE, jdbcT);
         return result;
     }
 
@@ -254,6 +253,7 @@ public class FilmDbStorage implements FilmStorage {
         Film film = getFilmFromDbById(id);
         film.deleteUserLike(userId);
         insertFilmInDb(film);
+        Event.addEventIntoDataBase(userId, id, OperationType.REMOVE, EventType.LIKE, jdbcT);
         return "Like удален";
     }
 
@@ -473,7 +473,7 @@ public class FilmDbStorage implements FilmStorage {
         return filmList;
     }
 
-    /*
+    /**
      *Возвращает список фильмов, рекомендованных к просмотру пользователю.
      * Алгоритм:
      * 1. Запрос в БД список лайков фильмов пользователем;

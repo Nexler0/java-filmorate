@@ -3,13 +3,18 @@ package ru.yandex.practicum.filmorate.storage.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.OperationType;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,7 +30,7 @@ public class UserDbStorage implements UserStorage {
 
     private static final String GET_ALL_USERS_SQL =
             "SELECT *, f.FRIEND_ID AS FRIEND_ID FROM USERS " +
-            "LEFT JOIN FRIENDS AS F on USERS.USER_ID = F.USER_ID";
+                    "LEFT JOIN FRIENDS AS F on USERS.USER_ID = F.USER_ID";
     private static final String GET_USER_IN_DB_BY_EMAIL_LOGIN_BIRTHDAY_SQL =
             "SELECT * FROM USERS WHERE EMAIL = ? AND LOGIN = ? AND BIRTHDAY = ?";
     private static final String GET_LAST_USER_ID_SQL =
@@ -229,6 +234,7 @@ public class UserDbStorage implements UserStorage {
         if (getUserById(friendId) != null) {
             user.addFriend(friendId);
             user = updateUser(user);
+            Event.addEventIntoDataBase(userId, friendId, OperationType.ADD, EventType.FRIEND, jdbcT);
         }
         return user;
     }
@@ -239,6 +245,7 @@ public class UserDbStorage implements UserStorage {
         if (getUserById(friendId) != null) {
             user.deleteFriend(friendId);
             user = updateUser(user);
+            Event.addEventIntoDataBase(userId, friendId, OperationType.REMOVE, EventType.FRIEND, jdbcT);
         }
         return user;
     }

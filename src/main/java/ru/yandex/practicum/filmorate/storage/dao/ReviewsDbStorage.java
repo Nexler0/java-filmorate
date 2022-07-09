@@ -7,6 +7,9 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.OperationType;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewsStorage;
 
@@ -60,6 +63,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
             jdbcT.update(
                     INSERT_REVIEW_SQL, review.getId(), review.getContent(), review.getIsPositive(), review.getUserId(),
                     review.getFilmId(), review.getUseful());
+            Event.addEventIntoDataBase(review.getUserId(), review.getId(), OperationType.ADD, EventType.REVIEW, jdbcT);
             return review;
         } else {
             throw new ValidationException("Ошибка создания отзыва");
@@ -80,6 +84,7 @@ public class ReviewsDbStorage implements ReviewsStorage {
     @Override
     public Review updateReviews(Review review) {
         jdbcT.update(UPDATE_REVIEW_BY_ID, review.getContent(), review.getIsPositive(), review.getId());
+        Event.addEventIntoDataBase(review.getUserId(), review.getId(), OperationType.UPDATE, EventType.REVIEW, jdbcT);
         return review;
     }
 
@@ -134,6 +139,8 @@ public class ReviewsDbStorage implements ReviewsStorage {
     @Override
     public String deleteReviewById(int reviewId) {
         jdbcT.update(DELETE_REVIEW_BY_ID_SQL, reviewId);
+        Event.addEventIntoDataBase(getReviewById(reviewId).getUserId(), reviewId
+                , OperationType.REMOVE, EventType.REVIEW, jdbcT);
         return String.format("Отзыв с ID:%s удален", reviewId);
     }
 

@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
@@ -12,11 +14,13 @@ import java.util.*;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final EventStorage eventStorage;
     private static final int GENRE_ID_START = 1;
     private static final int GENRE_ID_FINISH = 6;
 
-    public FilmService(FilmStorage filmDbStorage) {
+    public FilmService(FilmStorage filmDbStorage, EventStorage eventStorage) {
         this.filmStorage = filmDbStorage;
+        this.eventStorage = eventStorage;
     }
 
     public List<Film> findAllFilms() {
@@ -110,6 +114,9 @@ public class FilmService {
         } else {
             return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
         }
+    }
 
+    public List<Event> getFeed(int userId){
+        return eventStorage.getFeed(userId);
     }
 }
